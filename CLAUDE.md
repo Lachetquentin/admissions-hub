@@ -117,6 +117,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 | `npm test` | Vitest unit + Supertest integration (needs `DATABASE_URL_TEST`) |
 | `npm run db:migrate` / `db:seed` / `db:generate` | Drizzle migrations / seed / new migration from schema |
 | `docker compose up -d db` | local Postgres (dev + test databases) |
+| `docker compose up --build` | full stack on :8080 (db + api with migrations/seed + nginx web) |
 
 ### Conventions
 - Conventional commits; one branch + one PR per milestone.
@@ -125,6 +126,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Every API error goes through `middleware/errorHandler.ts` → `{ error: { code, message, details? } }`.
 - Sync status transitions only through `lib/syncStateMachine.ts` (documented in `docs/STATE_MACHINES.md`).
 - Out-of-scope ideas go to `docs/IDEAS.md`, never into code.
+- Demo deploys on Render from `render.yaml` with `SALESFORCE_ENABLED=false` (`docs/DEPLOY.md`).
 - UI: shadcn/ui (radix, `apps/web/src/components/ui`, add with `npx shadcn@latest add <name>` from `apps/web`). Design charter "Registre" (light, petrol `#0E5E5A`, IBM Plex): every colour is a token in `apps/web/src/index.css`, never a raw hex in components. French copy, sentence case, no trailing period on labels.
 - Front state: server data via TanStack Query hooks in `apps/web/src/hooks`; list filters live in the URL (`useListFilters`).
 - Secrets never committed: `.env.example` documents every variable, `config/env.ts` validates at startup.
