@@ -46,11 +46,7 @@ export async function apiFetch<T>(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiRequestError(
-      0,
-      'NETWORK_ERROR',
-      'Le serveur est injoignable. Réessayez dans un instant.',
-    );
+    throw new ApiRequestError(0, 'NETWORK_ERROR', 'The server cannot be reached');
   }
 
   if (res.status === 204) return undefined as T;
@@ -62,7 +58,7 @@ export async function apiFetch<T>(
   throw new ApiRequestError(
     res.status,
     error?.code ?? 'HTTP_ERROR',
-    error?.message ?? `Erreur ${res.status}`,
+    error?.message ?? `HTTP ${res.status}`,
     error?.details,
   );
 }

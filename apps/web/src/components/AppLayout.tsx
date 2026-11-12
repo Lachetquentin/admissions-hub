@@ -1,9 +1,11 @@
 import { LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { useSchools } from '@/hooks/useApplications';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { Logo } from './Logo';
 import { SalesforceConnection } from './SalesforceConnection';
 
@@ -16,12 +18,13 @@ const initials = (name: string) =>
     .toUpperCase();
 
 export function AppLayout() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { data: schools } = useSchools();
   const scopeLabel =
     user?.role === 'GROUP_ADMIN'
-      ? 'Toutes les écoles'
-      : (schools?.find((s) => s.id === user?.schoolId)?.name ?? 'Mon école');
+      ? t('common.allSchools')
+      : (schools?.find((s) => s.id === user?.schoolId)?.name ?? t('common.mySchool'));
 
   return (
     <div className="min-h-screen">
@@ -33,7 +36,7 @@ export function AppLayout() {
           >
             <Logo />
           </Link>
-          <nav aria-label="Navigation principale" className="flex gap-1">
+          <nav aria-label={t('common.mainNav')} className="flex gap-1">
             <NavLink
               to="/applications"
               className={({ isActive }) =>
@@ -45,11 +48,12 @@ export function AppLayout() {
                 )
               }
             >
-              Candidatures
+              {t('nav.applications')}
             </NavLink>
           </nav>
           <div className="grow" />
           <SalesforceConnection />
+          <LanguageSwitcher />
           {user && (
             <div className="flex items-center gap-3">
               <span
@@ -66,8 +70,8 @@ export function AppLayout() {
                 variant="ghost"
                 size="icon"
                 onClick={logout}
-                aria-label="Se déconnecter"
-                title="Se déconnecter"
+                aria-label={t('common.logout')}
+                title={t('common.logout')}
               >
                 <LogOut strokeWidth={1.5} />
               </Button>

@@ -3,7 +3,7 @@ import {
   type ApplicationStatus,
   type StatusCounts,
 } from '@admissions-hub/shared';
-import { STATUS_META } from '@/lib/labels';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -14,12 +14,13 @@ type Props = {
 
 /** Counters per status that double as the status filter. */
 export function StatusTiles({ counts, selected, onSelect }: Props) {
+  const { t } = useTranslation();
   const total = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : undefined;
   const tiles = [
-    { key: undefined, label: 'Toutes', count: total },
+    { key: undefined, label: t('status.all'), count: total },
     ...APPLICATION_STATUSES.map((s) => ({
       key: s,
-      label: STATUS_META[s].plural,
+      label: t(`status.${s}.many`),
       count: counts?.[s],
     })),
   ];
@@ -27,14 +28,14 @@ export function StatusTiles({ counts, selected, onSelect }: Props) {
   return (
     <div
       role="group"
-      aria-label="Filtrer par statut"
+      aria-label={t('status.filter')}
       className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
     >
       {tiles.map(({ key, label, count }) => {
         const active = key === selected;
         return (
           <button
-            key={label}
+            key={key ?? 'all'}
             type="button"
             aria-pressed={active}
             aria-label={count === undefined ? label : `${label} (${count})`}

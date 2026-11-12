@@ -8,6 +8,10 @@ const base64Key32 = z
     'must be 32 bytes encoded in base64',
   );
 
+/** `KEY=` (empty, as in .env.example or `${KEY:-}` in Compose) means "not set". */
+const optional = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
+
 export const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -21,15 +25,15 @@ export const envSchema = z
     /** false (e.g. the public demo): every Salesforce feature is off and answers 503. */
     SALESFORCE_ENABLED: z.stringbool().default(false),
     SALESFORCE_LOGIN_URL: z.url().default('https://login.salesforce.com'),
-    SALESFORCE_CLIENT_ID: z.string().optional(),
-    SALESFORCE_CLIENT_SECRET: z.string().optional(),
-    SALESFORCE_REDIRECT_URI: z.url().optional(),
+    SALESFORCE_CLIENT_ID: optional(z.string()),
+    SALESFORCE_CLIENT_SECRET: optional(z.string()),
+    SALESFORCE_REDIRECT_URI: optional(z.url()),
     SALESFORCE_API_VERSION: z
       .string()
       .regex(/^v\d+\.\d$/, 'e.g. v62.0')
       .default('v62.0'),
     /** AES-256-GCM key protecting the Salesforce tokens at rest. */
-    TOKEN_ENCRYPTION_KEY: base64Key32.optional(),
+    TOKEN_ENCRYPTION_KEY: optional(base64Key32),
   })
   .superRefine((value, ctx) => {
     if (!value.SALESFORCE_ENABLED) return;

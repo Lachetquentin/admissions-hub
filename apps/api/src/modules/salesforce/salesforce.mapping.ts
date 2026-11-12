@@ -1,8 +1,4 @@
-import {
-  APPLICATION_STATUS_LABELS,
-  type Application,
-  type ApplicationStatus,
-} from '@admissions-hub/shared';
+import type { Application, ApplicationStatus } from '@admissions-hub/shared';
 import type { LeadFields } from './salesforce.client';
 
 /**
@@ -14,6 +10,14 @@ export const LEAD_STATUS: Record<ApplicationStatus, string> = {
   REVIEWING: 'Working - Contacted',
   ACCEPTED: 'Working - Contacted',
   REJECTED: 'Closed - Not Converted',
+};
+
+/** The Lead description is org data for French admissions teams: it stays in French. */
+const STATUS_LABEL_FR: Record<ApplicationStatus, string> = {
+  NEW: 'Nouvelle',
+  REVIEWING: 'En revue',
+  ACCEPTED: 'Acceptée',
+  REJECTED: 'Refusée',
 };
 
 export const LEAD_SOURCE = 'Web';
@@ -35,7 +39,7 @@ export function toLead(application: MappedApplication, schoolName: string): Lead
     Status: LEAD_STATUS[application.status],
     Description: [
       `Programme visé : ${application.program}`,
-      `Statut Admissions Hub : ${APPLICATION_STATUS_LABELS[application.status]}`,
+      `Statut Admissions Hub : ${STATUS_LABEL_FR[application.status]}`,
       `Référence Admissions Hub : ${application.id}`,
     ].join('\n'),
   };

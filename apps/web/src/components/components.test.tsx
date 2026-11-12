@@ -2,7 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { Input } from '@/components/ui/input';
+import { i18n } from '@/i18n';
 import { FormField } from './FormField';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { Pagination } from './Pagination';
 import { StatusTiles } from './StatusTiles';
 
@@ -68,5 +70,24 @@ describe('FormField', () => {
     const input = screen.getByLabelText('École');
     expect(input).not.toHaveAttribute('aria-invalid');
     expect(input).toHaveAccessibleDescription("Une candidature ne change pas d'école");
+  });
+});
+
+describe('LanguageSwitcher', () => {
+  it('switches the copy to English and back', async () => {
+    const counts = { NEW: 4, REVIEWING: 3, ACCEPTED: 2, REJECTED: 1 };
+    render(
+      <>
+        <LanguageSwitcher />
+        <StatusTiles counts={counts} selected={undefined} onSelect={() => {}} />
+      </>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'en' }));
+    expect(screen.getByRole('button', { name: 'en' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'All (10)' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Accepted (2)' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'fr' }));
+    expect(screen.getByRole('button', { name: 'Toutes (10)' })).toBeInTheDocument();
+    expect(i18n.language).toBe('fr');
   });
 });

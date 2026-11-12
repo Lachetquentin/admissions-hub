@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,12 +7,13 @@ import {
   useSalesforceCallbackToast,
   useSalesforceStatus,
 } from '@/hooks/useSalesforce';
-import { errorMessage } from '@/components/PageState';
+import { errorMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 
 /** Header pill: is the group's Salesforce org connected? A GROUP_ADMIN can connect it from here. */
 export function SalesforceConnection() {
   useSalesforceCallbackToast();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: status } = useSalesforceStatus();
   const connect = useConnectSalesforce();
@@ -24,10 +26,10 @@ export function SalesforceConnection() {
     return (
       <span
         className={cn(pill, 'border-border bg-muted text-muted-foreground')}
-        title="Mode démo : la synchronisation est coupée"
+        title={t('salesforce.pillDisabledHint')}
       >
         <span aria-hidden="true" className="size-2 rounded-full border-[1.5px] border-faint" />
-        Salesforce désactivé
+        {t('salesforce.pillDisabled')}
       </span>
     );
   }
@@ -39,7 +41,7 @@ export function SalesforceConnection() {
         title={status.instanceUrl ?? undefined}
       >
         <span aria-hidden="true" className="size-2 rounded-full bg-sync-done-dot" />
-        Salesforce connecté
+        {t('salesforce.pillConnected')}
       </span>
     );
   }
@@ -47,7 +49,7 @@ export function SalesforceConnection() {
   return (
     <span className={cn(pill, 'border-border bg-muted pr-1 text-muted-foreground')}>
       <span aria-hidden="true" className="size-2 rounded-full border-[1.5px] border-faint" />
-      Salesforce non connecté
+      {t('salesforce.pillNotConnected')}
       {user?.role === 'GROUP_ADMIN' && (
         <Button
           size="xs"
@@ -57,7 +59,7 @@ export function SalesforceConnection() {
             connect.mutate(undefined, { onError: (error) => toast.error(errorMessage(error)) })
           }
         >
-          {connect.isPending ? 'Redirection…' : 'Connecter'}
+          {connect.isPending ? t('salesforce.redirecting') : t('salesforce.connect')}
         </Button>
       )}
     </span>

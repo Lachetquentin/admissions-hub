@@ -1,3 +1,9 @@
+# `docker compose up --build`  → the whole app on http://localhost:8080 (migrations and seed included)
+# `docker compose up -d db`     → only PostgreSQL, for `npm run dev`
+#
+# Values below are local defaults for a demo on your machine. Override them in `.env`
+# (read automatically by Compose); never reuse them in a deployed environment.
+
 services:
   db:
     image: postgres:17-alpine
@@ -14,6 +20,41 @@ services:
       test: ['CMD-SHELL', 'pg_isready -U admissions']
       interval: 5s
       retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_URL: ${COMPOSE_APP_URL:-http://localhost:8080}
+      DATABASE_URL: postgres://admissions:admissions@db:5432/admissions
+      JWT_SECRET: ${JWT_SECRET:-local-compose-only-secret-change-me-0123456789}
+      SALESFORCE_ENABLED: ${SALESFORCE_ENABLED:-false}
+      SALESFORCE_LOGIN_URL: ${SALESFORCE_LOGIN_URL:-https://login.salesforce.com}
+      SALESFORCE_CLIENT_ID: ${SALESFORCE_CLIENT_ID:-}
+      SALESFORCE_CLIENT_SECRET: ${SALESFORCE_CLIENT_SECRET:-}
+      # Through nginx: register this URL as a callback in the External Client App too.
+      SALESFORCE_REDIRECT_URI: ${COMPOSE_SALESFORCE_REDIRECT_URI:-http://localhost:8080/api/integrations/salesforce/callback}
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_UPSTREAM: http://api:3000
+    ports:
+      - '8080:80'
+    restart: unless-stopped
 
 volumes:
   db-data:

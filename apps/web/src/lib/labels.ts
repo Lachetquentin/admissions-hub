@@ -1,52 +1,33 @@
-import {
-  APPLICATION_STATUS_LABELS as L,
-  type ApplicationStatus,
-  type SyncStatus,
-} from '@admissions-hub/shared';
+import type { ApplicationStatus, SyncStatus } from '@admissions-hub/shared';
+import { currentLanguage } from '@/i18n';
 
-/** French copy and badge colours for each business status. */
-export const STATUS_META: Record<
-  ApplicationStatus,
-  { label: string; plural: string; className: string }
-> = {
-  NEW: { label: L.NEW, plural: 'Nouvelles', className: 'bg-status-new text-status-new-foreground' },
-  REVIEWING: {
-    label: L.REVIEWING,
-    plural: 'En revue',
-    className: 'bg-status-reviewing text-status-reviewing-foreground',
-  },
-  ACCEPTED: {
-    label: L.ACCEPTED,
-    plural: 'Acceptées',
-    className: 'bg-status-accepted text-status-accepted-foreground',
-  },
-  REJECTED: {
-    label: L.REJECTED,
-    plural: 'Refusées',
-    className: 'bg-status-rejected text-status-rejected-foreground',
-  },
+/** Badge colours per business status (copy lives in the i18n dictionaries: `status.*`). */
+export const STATUS_STYLE: Record<ApplicationStatus, string> = {
+  NEW: 'bg-status-new text-status-new-foreground',
+  REVIEWING: 'bg-status-reviewing text-status-reviewing-foreground',
+  ACCEPTED: 'bg-status-accepted text-status-accepted-foreground',
+  REJECTED: 'bg-status-rejected text-status-rejected-foreground',
 };
 
-export const SYNC_META: Record<SyncStatus, { label: string; text: string; dot: string }> = {
-  NOT_SYNCED: {
-    label: 'Non synchronisée',
-    text: 'text-muted-foreground',
-    dot: 'border-[1.5px] border-faint',
-  },
-  PENDING: { label: 'En cours', text: 'text-sync-pending', dot: 'bg-sync-pending-dot' },
-  SYNCED: { label: 'Synchronisée', text: 'text-primary', dot: 'bg-sync-done-dot' },
-  FAILED: { label: 'Échec', text: 'text-destructive font-medium', dot: 'bg-sync-failed-dot' },
+/** Text and dot colours per sync status (copy: `sync.*`). */
+export const SYNC_STYLE: Record<SyncStatus, { text: string; dot: string }> = {
+  NOT_SYNCED: { text: 'text-muted-foreground', dot: 'border-[1.5px] border-faint' },
+  PENDING: { text: 'text-sync-pending', dot: 'bg-sync-pending-dot' },
+  SYNCED: { text: 'text-primary', dot: 'bg-sync-done-dot' },
+  FAILED: { text: 'text-destructive font-medium', dot: 'bg-sync-failed-dot' },
 };
 
-const dateFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-const dateTimeFormat = new Intl.DateTimeFormat('fr-FR', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
+const LOCALE = { en: 'en-GB', fr: 'fr-FR' } as const;
 
-export const formatDate = (iso: string) => dateFormat.format(new Date(iso));
-export const formatDateTime = (iso: string) => dateTimeFormat.format(new Date(iso));
+export const formatDate = (iso: string) =>
+  new Intl.DateTimeFormat(LOCALE[currentLanguage()], {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(iso));
+
+export const formatDateTime = (iso: string) =>
+  new Intl.DateTimeFormat(LOCALE[currentLanguage()], {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(iso));

@@ -1,10 +1,12 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { pageItems, totalPages } from '@/lib/pagination';
 
 type Props = { page: number; pageSize: number; total: number; onChange: (page: number) => void };
 
 export function Pagination({ page, pageSize, total, onChange }: Props) {
+  const { t } = useTranslation();
   const pages = totalPages(total, pageSize);
   const first = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const last = Math.min(page * pageSize, total);
@@ -12,13 +14,13 @@ export function Pagination({ page, pageSize, total, onChange }: Props) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-[13px] text-muted-foreground">
       <span className="tabular-nums">
-        {first}–{last} sur {total} · page {page} sur {pages}
+        {t('pagination.range', { first, last, total, page, pages })}
       </span>
-      <nav aria-label="Pagination" className="flex gap-1">
+      <nav aria-label={t('pagination.label')} className="flex gap-1">
         <Button
           variant="outline"
           size="icon"
-          aria-label="Page précédente"
+          aria-label={t('pagination.previous')}
           disabled={page <= 1}
           onClick={() => onChange(page - 1)}
         >
@@ -34,7 +36,7 @@ export function Pagination({ page, pageSize, total, onChange }: Props) {
               key={item}
               variant={item === page ? 'default' : 'outline'}
               size="icon"
-              aria-label={`Page ${item}`}
+              aria-label={t('pagination.page', { page: item })}
               aria-current={item === page ? 'page' : undefined}
               onClick={() => onChange(item)}
               className="tabular-nums"
@@ -46,7 +48,7 @@ export function Pagination({ page, pageSize, total, onChange }: Props) {
         <Button
           variant="outline"
           size="icon"
-          aria-label="Page suivante"
+          aria-label={t('pagination.next')}
           disabled={page >= pages}
           onClick={() => onChange(page + 1)}
         >

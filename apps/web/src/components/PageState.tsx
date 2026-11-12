@@ -1,8 +1,9 @@
 import { CircleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { ApiRequestError } from '@/api/client';
+import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import { errorMessage } from '@/lib/messages';
 
 /** Readable error block: a short title, an explanation, an optional technical line. */
 export function ErrorAlert({
@@ -28,17 +29,16 @@ export function ErrorAlert({
   );
 }
 
-export const errorMessage = (error: unknown) =>
-  error instanceof ApiRequestError ? error.message : 'Une erreur inattendue est survenue.';
-
 export function LoadError({ error }: { error: unknown }) {
-  return <ErrorAlert title="Impossible de charger les données">{errorMessage(error)}</ErrorAlert>;
+  const { t } = useTranslation();
+  return <ErrorAlert title={t('common.loadError')}>{errorMessage(error)}</ErrorAlert>;
 }
 
 /** Placeholder rows that keep the layout from jumping while data loads. */
 export function LoadingRows({ rows = 6 }: { rows?: number }) {
+  const { t } = useTranslation();
   return (
-    <div role="status" aria-label="Chargement" className="flex flex-col gap-3 p-4">
+    <div role="status" aria-label={t('common.loading')} className="flex flex-col gap-3 p-4">
       {Array.from({ length: rows }, (_, i) => (
         <Skeleton key={i} className="h-10 w-full" />
       ))}

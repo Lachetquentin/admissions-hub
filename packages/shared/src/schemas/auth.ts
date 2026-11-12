@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { idSchema } from './common';
 import { roleSchema } from '../enums';
+import { VALIDATION } from './validation';
 
 export const loginSchema = z.object({
-  email: z.email('Adresse e-mail invalide').trim().toLowerCase(),
-  password: z.string().min(1, 'Mot de passe requis'),
+  email: z.email(VALIDATION.email).trim().toLowerCase(),
+  password: z.string().min(1, VALIDATION.required),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 

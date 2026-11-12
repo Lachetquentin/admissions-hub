@@ -9,7 +9,8 @@ import {
   type SalesforceStatus,
 } from '@admissions-hub/shared';
 import { apiFetch } from '@/api/client';
-import { callbackErrorMessage } from '@/lib/salesforceMessages';
+import { i18n } from '@/i18n';
+import { callbackErrorMessage } from '@/lib/messages';
 import { useSaveApplication } from './useApplications';
 
 const statusKey = ['salesforce', 'status'] as const;
@@ -41,7 +42,7 @@ export function useSalesforceCallbackToast() {
 
   useEffect(() => {
     if (!result) return;
-    if (result === 'connected') toast.success('Salesforce est connecté');
+    if (result === 'connected') toast.success(i18n.t('salesforce.connected'));
     else toast.error(callbackErrorMessage(reason));
     void queryClient.invalidateQueries({ queryKey: statusKey });
     setParams(

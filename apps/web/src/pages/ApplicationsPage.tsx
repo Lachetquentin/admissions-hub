@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Pagination } from '@/components/Pagination';
 import { LoadError, LoadingRows } from '@/components/PageState';
@@ -28,6 +29,7 @@ import { formatDate } from '@/lib/labels';
 const ALL_SCHOOLS = 'all';
 
 export function ApplicationsPage() {
+  const { t } = useTranslation();
   const { filters, update } = useListFilters();
   const list = useApplicationList(filters);
   const { data: schools = [] } = useSchools();
@@ -37,19 +39,24 @@ export function ApplicationsPage() {
   const subtitle =
     total === undefined
       ? ' '
-      : `${total} candidature${total > 1 ? 's' : ''}${schools.length > 1 ? ` · ${schools.length} écoles` : ''}`;
+      : [
+          t('list.count', { count: total }),
+          schools.length > 1 ? t('list.schoolCount', { count: schools.length }) : null,
+        ]
+          .filter(Boolean)
+          .join(' · ');
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] font-medium tracking-tight">Candidatures</h1>
+          <h1 className="text-[28px] font-medium tracking-tight">{t('list.title')}</h1>
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
         <Button asChild size="lg">
           <Link to="/applications/new">
             <Plus strokeWidth={1.5} />
-            Nouvelle candidature
+            {t('list.create')}
           </Link>
         </Button>
       </div>
@@ -65,7 +72,7 @@ export function ApplicationsPage() {
           <div className="flex flex-wrap items-end gap-4 border-b p-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="school-filter" className="text-xs text-muted-foreground">
-                École
+                {t('list.school')}
               </Label>
               <Select
                 value={filters.schoolId ?? ALL_SCHOOLS}
@@ -77,7 +84,7 @@ export function ApplicationsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={ALL_SCHOOLS}>Toutes les écoles</SelectItem>
+                  <SelectItem value={ALL_SCHOOLS}>{t('common.allSchools')}</SelectItem>
                   {schools.map((school) => (
                     <SelectItem key={school.id} value={school.id}>
                       {school.name}
@@ -96,20 +103,18 @@ export function ApplicationsPage() {
             <LoadError error={list.error} />
           </div>
         ) : list.data.items.length === 0 ? (
-          <p className="px-4 py-16 text-center text-muted-foreground">
-            Aucune candidature pour ces filtres
-          </p>
+          <p className="px-4 py-16 text-center text-muted-foreground">{t('list.empty')}</p>
         ) : (
           <>
             <Table className="min-w-[960px]">
               <TableHeader className="bg-muted">
                 <TableRow>
-                  <TableHead className="px-4">Candidat</TableHead>
-                  <TableHead className="px-4">École</TableHead>
-                  <TableHead className="px-4">Programme</TableHead>
-                  <TableHead className="px-4">Statut</TableHead>
-                  <TableHead className="px-4">Salesforce</TableHead>
-                  <TableHead className="px-4 text-right">Reçue le</TableHead>
+                  <TableHead className="px-4">{t('list.columns.candidate')}</TableHead>
+                  <TableHead className="px-4">{t('list.columns.school')}</TableHead>
+                  <TableHead className="px-4">{t('list.columns.program')}</TableHead>
+                  <TableHead className="px-4">{t('list.columns.status')}</TableHead>
+                  <TableHead className="px-4">{t('list.columns.salesforce')}</TableHead>
+                  <TableHead className="px-4 text-right">{t('list.columns.receivedAt')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className={list.isPlaceholderData ? 'opacity-60' : undefined}>

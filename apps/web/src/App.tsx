@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
 import { AppLayout } from '@/components/AppLayout';
 import { LoadingRows } from '@/components/PageState';
@@ -18,12 +19,11 @@ function RequireAuth() {
 }
 
 function NotFound() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-2 py-16 text-center">
-      <h1 className="text-xl font-medium">Page introuvable</h1>
-      <p className="text-muted-foreground">
-        Cette adresse ne correspond à aucune page d'Admissions Hub
-      </p>
+      <h1 className="text-xl font-medium">{t('notFound.title')}</h1>
+      <p className="text-muted-foreground">{t('notFound.body')}</p>
     </div>
   );
 }
