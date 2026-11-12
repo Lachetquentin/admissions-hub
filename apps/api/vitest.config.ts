@@ -11,7 +11,9 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.ts'],
       exclude: ['src/server.ts', 'src/db/migrate.ts', 'src/db/seed.ts', 'src/db/migrations/**'],
-      reporter: ['text', 'html', 'lcov'],
+      reporter: ['text', 'text-summary', 'html', 'lcov', 'json-summary'],
+      // CI fails below these floors (current coverage is well above them).
+      thresholds: { lines: 85, statements: 85, functions: 85, branches: 80 },
     },
   },
 });

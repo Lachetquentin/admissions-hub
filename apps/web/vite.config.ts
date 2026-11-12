@@ -15,6 +15,12 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
     css: false,
-    coverage: { provider: 'v8', include: ['src/**/*.{ts,tsx}'], reporter: ['text', 'html', 'lcov'] },
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      // Generated shadcn/ui primitives and the entry point are not ours to cover.
+      exclude: ['src/components/ui/**', 'src/main.tsx'],
+      reporter: ['text', 'text-summary', 'html', 'lcov', 'json-summary'],
+    },
   },
 });

@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: admissions
+          POSTGRES_PASSWORD: admissions
+          POSTGRES_DB: admissions_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U admissions"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Test-only values: the integration tests run against this throwaway database,
+      # and Salesforce is always mocked (no network call leaves the runner).
+      DATABASE_URL_TEST: postgres://admissions:admissions@localhost:5432/admissions_test
+      JWT_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          {
+            echo "## Coverage"
+            echo "| Package | Lines | Branches | Functions |"
+            echo "| --- | ---: | ---: | ---: |"
+            for pkg in packages/shared apps/api apps/web; do
+              file="$pkg/coverage/coverage-summary.json"
+              [ -f "$file" ] || continue
+              node -e "const t=require('./$file').total; console.log('| $pkg | ' + [t.lines,t.branches,t.functions].map(m => m.pct + '%').join(' | ') + ' |')"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            packages/shared/coverage
+            apps/api/coverage
+            apps/web/coverage
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Build
+        run: npm run build
