@@ -18,6 +18,20 @@ describe('envSchema', () => {
     expect(envSchema.parse({ ...base, SALESFORCE_ENABLED: 'false' }).salesforce).toBeNull();
   });
 
+  it('treats empty Salesforce variables as not set (copied .env.example, Compose defaults)', () => {
+    const empty = {
+      SALESFORCE_CLIENT_ID: '',
+      SALESFORCE_CLIENT_SECRET: '',
+      SALESFORCE_REDIRECT_URI: '',
+      TOKEN_ENCRYPTION_KEY: '',
+    };
+    expect(envSchema.parse({ ...base, ...empty }).salesforce).toBeNull();
+    const enabled = envSchema.safeParse({ ...base, ...empty, SALESFORCE_ENABLED: 'true' });
+    expect(enabled.error?.issues.map((i) => i.message)).toContain(
+      'required when SALESFORCE_ENABLED=true',
+    );
+  });
+
   it('builds the Salesforce config when enabled', () => {
     const env = envSchema.parse({ ...base, ...salesforce, SALESFORCE_ENABLED: 'true' });
     expect(env.salesforce).toMatchObject({
