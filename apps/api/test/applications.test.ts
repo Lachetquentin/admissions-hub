@@ -44,6 +44,18 @@ describe('GET /api/applications', () => {
     expect([...dates].sort().reverse()).toEqual(dates);
   });
 
+  it('returns counts per status for the school filter, ignoring the status filter', async () => {
+    const res = await group.get(`/api/applications?schoolId=${iin.id}&status=NEW`);
+    expect(res.body.counts).toEqual({ NEW: 3, REVIEWING: 3, ACCEPTED: 3, REJECTED: 3 });
+    expect(res.body.total).toBe(3);
+  });
+
+  it('counts only the own school for a SCHOOL_ADMIN', async () => {
+    const res = await escAdmin.get('/api/applications');
+    const counts = Object.values(res.body.counts as Record<string, number>);
+    expect(counts.reduce((a, b) => a + b, 0)).toBe(PER_SCHOOL);
+  });
+
   it('filters by school and status', async () => {
     const res = await group.get(`/api/applications?schoolId=${iin.id}&status=ACCEPTED&pageSize=100`);
     expect(res.body.total).toBeGreaterThan(0);

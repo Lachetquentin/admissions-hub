@@ -1,10 +1,12 @@
 import { and, count, desc, eq } from 'drizzle-orm';
+import { APPLICATION_STATUSES } from '@admissions-hub/shared';
 import type {
   Application,
   ApplicationCreate,
+  ApplicationList,
   ApplicationListFilters,
   ApplicationUpdate,
-  Paginated,
+  StatusCounts,
 } from '@admissions-hub/shared';
 import { db } from '../../db/client';
 import { applications, type ApplicationRow } from '../../db/schema';
@@ -26,13 +28,13 @@ const byIdInScope = (scope: SchoolScope, id: string) =>
 export async function listApplications(
   scope: SchoolScope,
   { page, pageSize, schoolId, status }: ApplicationListFilters,
-): Promise<Paginated<Application>> {
-  const where = and(
+): Promise<ApplicationList> {
+  const schoolWhere = and(
     inScope(applications.schoolId, scope),
     schoolId ? eq(applications.schoolId, schoolId) : undefined,
-    status ? eq(applications.status, status) : undefined,
   );
-  const [rows, [totalRow]] = await Promise.all([
+  const where = and(schoolWhere, status ? eq(applications.status, status) : undefined);
+  const [rows, [totalRow], countRows] = await Promise.all([
     db
       .select()
       .from(applications)
@@ -41,8 +43,15 @@ export async function listApplications(
       .limit(pageSize)
       .offset((page - 1) * pageSize),
     db.select({ total: count() }).from(applications).where(where),
+    db
+      .select({ status: applications.status, total: count() })
+      .from(applications)
+      .where(schoolWhere)
+      .groupBy(applications.status),
   ]);
-  return { items: rows.map(toApplication), page, pageSize, total: totalRow?.total ?? 0 };
+  const counts = Object.fromEntries(APPLICATION_STATUSES.map((s) => [s, 0])) as StatusCounts;
+  for (const row of countRows) counts[row.status] = row.total;
+  return { items: rows.map(toApplication), page, pageSize, total: totalRow?.total ?? 0, counts };
 }
 
 export async function getApplication(scope: SchoolScope, id: string): Promise<Application> {

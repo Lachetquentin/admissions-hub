@@ -2,18 +2,18 @@ import { z } from 'zod';
 import { idSchema, isoDateSchema, paginatedSchema, paginationQuerySchema } from './common';
 import { applicationStatusSchema, syncStatusSchema } from '../enums';
 
-const requiredText = (max: number) => z.string().trim().min(1, 'Required').max(max);
+const requiredText = (max: number) => z.string().trim().min(1, 'Champ requis').max(max, `${max} caractères maximum`);
 
 /** Fields an admin can write. Shared by the create/edit form and the API. */
 export const applicationInputSchema = z.object({
   schoolId: idSchema,
   firstName: requiredText(100),
   lastName: requiredText(100),
-  email: z.email('Invalid email').trim().toLowerCase().max(254),
+  email: z.email('Adresse e-mail invalide').trim().toLowerCase().max(254),
   phone: z
     .string()
     .trim()
-    .regex(/^\+?[0-9 ().-]{6,20}$/, 'Invalid phone number'),
+    .regex(/^\+?[0-9 ().-]{6,20}$/, 'Numéro de téléphone invalide'),
   program: requiredText(150),
   status: applicationStatusSchema.default('NEW'),
 });
@@ -25,7 +25,7 @@ export const applicationUpdateSchema = applicationInputSchema
   .omit({ schoolId: true })
   .extend({ status: applicationStatusSchema })
   .partial()
-  .refine((value) => Object.keys(value).length > 0, 'At least one field is required');
+  .refine((value) => Object.keys(value).length > 0, 'Au moins un champ est requis');
 export type ApplicationUpdate = z.infer<typeof applicationUpdateSchema>;
 
 export const applicationSchema = z.object({
@@ -53,4 +53,11 @@ export const applicationListQuerySchema = paginationQuerySchema.extend({
 export type ApplicationListQuery = z.input<typeof applicationListQuerySchema>;
 export type ApplicationListFilters = z.output<typeof applicationListQuerySchema>;
 
-export const applicationListSchema = paginatedSchema(applicationSchema);
+/** Applications per status for the current scope and school filter (the status filter is ignored). */
+export const statusCountsSchema = z.record(applicationStatusSchema, z.number().int());
+export type StatusCounts = z.infer<typeof statusCountsSchema>;
+
+export const applicationListSchema = paginatedSchema(applicationSchema).extend({
+  counts: statusCountsSchema,
+});
+export type ApplicationList = z.infer<typeof applicationListSchema>;

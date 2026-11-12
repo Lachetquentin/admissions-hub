@@ -17,6 +17,9 @@ const SCHOOLS = [
 const FIRST_NAMES = ['Camille', 'Lucas', 'Inès', 'Hugo', 'Léa', 'Nathan', 'Chloé', 'Yanis', 'Manon', 'Adam', 'Sarah', 'Louis'];
 const LAST_NAMES = ['Martin', 'Bernard', 'Dubois', 'Thomas', 'Robert', 'Richard', 'Petit', 'Durand', 'Leroy', 'Moreau', 'Simon', 'Laurent'];
 
+/** "Léa" → "lea": e-mail local parts stay plain ASCII. */
+const asciiSlug = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 /** Inserts demo data. Deterministic, so screenshots and demos stay stable. */
 export async function seed(database: Db = db): Promise<void> {
   const passwordHash = await hashPassword(SEED_PASSWORD);
@@ -45,7 +48,7 @@ export async function seed(database: Db = db): Promise<void> {
         schoolId: school.id,
         firstName,
         lastName,
-        email: `${firstName}.${lastName}${i}@example.com`.toLowerCase(),
+        email: `${asciiSlug(firstName)}.${asciiSlug(lastName)}${i}@example.com`,
         phone: `+33 6 ${String(10 + s).padStart(2, '0')} ${String(20 + i).padStart(2, '0')} 00 ${String(i).padStart(2, '0')}`,
         program: programs[i % programs.length]!,
         status: APPLICATION_STATUSES[i % APPLICATION_STATUSES.length] as ApplicationStatus,
