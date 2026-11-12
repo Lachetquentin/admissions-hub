@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { Express } from 'express';
 import request from 'supertest';
 import { afterAll } from 'vitest';
 import type { LoginResponse, School } from '@admissions-hub/shared';
@@ -28,10 +29,10 @@ export async function login(email: string): Promise<string> {
 export const GROUP_ADMIN = 'groupe@admissions.test';
 export const schoolAdmin = (slug: string) => `${slug}@admissions.test`;
 
-/** Supertest agent sending the bearer token on every call. */
-export const as = (token: string) => ({
-  get: (url: string) => request(app).get(url).set('Authorization', `Bearer ${token}`),
-  post: (url: string) => request(app).post(url).set('Authorization', `Bearer ${token}`),
-  patch: (url: string) => request(app).patch(url).set('Authorization', `Bearer ${token}`),
-  delete: (url: string) => request(app).delete(url).set('Authorization', `Bearer ${token}`),
+/** Supertest agent sending the bearer token on every call (to `target`, the shared app by default). */
+export const as = (token: string, target: Express = app) => ({
+  get: (url: string) => request(target).get(url).set('Authorization', `Bearer ${token}`),
+  post: (url: string) => request(target).post(url).set('Authorization', `Bearer ${token}`),
+  patch: (url: string) => request(target).patch(url).set('Authorization', `Bearer ${token}`),
+  delete: (url: string) => request(target).delete(url).set('Authorization', `Bearer ${token}`),
 });

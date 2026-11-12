@@ -57,5 +57,19 @@ export const applications = pgTable(
 );
 
 export type SchoolRow = typeof schools.$inferSelect;
+/**
+ * The group's Salesforce org: at most one row (primary key fixed to 'default').
+ * Tokens are stored encrypted (lib/crypto.ts), never in clear.
+ */
+export const salesforceConnections = pgTable('salesforce_connections', {
+  id: varchar('id', { length: 16 }).primaryKey().default('default'),
+  instanceUrl: varchar('instance_url', { length: 255 }).notNull(),
+  encryptedRefreshToken: text('encrypted_refresh_token').notNull(),
+  encryptedAccessToken: text('encrypted_access_token').notNull(),
+  connectedById: uuid('connected_by_id').references(() => users.id, { onDelete: 'set null' }),
+  ...timestamps,
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type ApplicationRow = typeof applications.$inferSelect;
+export type SalesforceConnectionRow = typeof salesforceConnections.$inferSelect;

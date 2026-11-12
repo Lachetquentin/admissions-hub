@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { idSchema, isoDateSchema, paginatedSchema, paginationQuerySchema } from './common';
 import { applicationStatusSchema, syncStatusSchema } from '../enums';
 
-const requiredText = (max: number) => z.string().trim().min(1, 'Champ requis').max(max, `${max} caractères maximum`);
+const requiredText = (max: number) =>
+  z.string().trim().min(1, 'Champ requis').max(max, `${max} caractères maximum`);
 
 /** Fields an admin can write. Shared by the create/edit form and the API. */
 export const applicationInputSchema = z.object({

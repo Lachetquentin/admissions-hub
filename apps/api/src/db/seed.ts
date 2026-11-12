@@ -10,15 +10,57 @@ import { applications, schools, users } from './schema';
 export const SEED_PASSWORD = 'admissions-demo';
 
 const SCHOOLS = [
-  { name: 'École Supérieure de Commerce', slug: 'esc', programs: ['Bachelor Business', 'MSc Marketing', 'MBA'] },
-  { name: "Institut d'Ingénierie Numérique", slug: 'iin', programs: ['Cycle Ingénieur', 'MSc Data', 'MSc Cybersécurité'] },
-  { name: 'École de Design Appliqué', slug: 'eda', programs: ['Bachelor Design', 'Mastère UX', 'Mastère Motion'] },
+  {
+    name: 'École Supérieure de Commerce',
+    slug: 'esc',
+    programs: ['Bachelor Business', 'MSc Marketing', 'MBA'],
+  },
+  {
+    name: "Institut d'Ingénierie Numérique",
+    slug: 'iin',
+    programs: ['Cycle Ingénieur', 'MSc Data', 'MSc Cybersécurité'],
+  },
+  {
+    name: 'École de Design Appliqué',
+    slug: 'eda',
+    programs: ['Bachelor Design', 'Mastère UX', 'Mastère Motion'],
+  },
 ];
-const FIRST_NAMES = ['Camille', 'Lucas', 'Inès', 'Hugo', 'Léa', 'Nathan', 'Chloé', 'Yanis', 'Manon', 'Adam', 'Sarah', 'Louis'];
-const LAST_NAMES = ['Martin', 'Bernard', 'Dubois', 'Thomas', 'Robert', 'Richard', 'Petit', 'Durand', 'Leroy', 'Moreau', 'Simon', 'Laurent'];
+const FIRST_NAMES = [
+  'Camille',
+  'Lucas',
+  'Inès',
+  'Hugo',
+  'Léa',
+  'Nathan',
+  'Chloé',
+  'Yanis',
+  'Manon',
+  'Adam',
+  'Sarah',
+  'Louis',
+];
+const LAST_NAMES = [
+  'Martin',
+  'Bernard',
+  'Dubois',
+  'Thomas',
+  'Robert',
+  'Richard',
+  'Petit',
+  'Durand',
+  'Leroy',
+  'Moreau',
+  'Simon',
+  'Laurent',
+];
 
 /** "Léa" → "lea": e-mail local parts stay plain ASCII. */
-const asciiSlug = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const asciiSlug = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 
 /** Inserts demo data. Deterministic, so screenshots and demos stay stable. */
 export async function seed(database: Db = db): Promise<void> {
@@ -61,13 +103,14 @@ export async function seed(database: Db = db): Promise<void> {
 
 async function main(): Promise<void> {
   const reset = process.argv.includes('--reset');
-  const [{ count }] = (await db.execute<{ count: number }>(sql`select count(*)::int as count from schools`)).rows as [
-    { count: number },
-  ];
+  const [{ count }] = (
+    await db.execute<{ count: number }>(sql`select count(*)::int as count from schools`)
+  ).rows as [{ count: number }];
   if (count > 0 && !reset) {
     console.log('Database already seeded, skipping (use --reset to wipe and reseed).');
   } else {
-    if (reset) await db.execute(sql`truncate applications, users, schools restart identity cascade`);
+    if (reset)
+      await db.execute(sql`truncate applications, users, schools restart identity cascade`);
     await seed();
     console.log('Seed done.');
   }

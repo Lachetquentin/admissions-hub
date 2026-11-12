@@ -1,20 +1,20 @@
-import type { ApplicationStatus, SyncStatus } from '@admissions-hub/shared';
+import { APPLICATION_STATUS_LABELS as L, type ApplicationStatus, type SyncStatus } from '@admissions-hub/shared';
 
 /** French copy and badge colours for each business status. */
 export const STATUS_META: Record<ApplicationStatus, { label: string; plural: string; className: string }> = {
-  NEW: { label: 'Nouvelle', plural: 'Nouvelles', className: 'bg-status-new text-status-new-foreground' },
+  NEW: { label: L.NEW, plural: 'Nouvelles', className: 'bg-status-new text-status-new-foreground' },
   REVIEWING: {
-    label: 'En revue',
+    label: L.REVIEWING,
     plural: 'En revue',
     className: 'bg-status-reviewing text-status-reviewing-foreground',
   },
   ACCEPTED: {
-    label: 'Acceptée',
+    label: L.ACCEPTED,
     plural: 'Acceptées',
     className: 'bg-status-accepted text-status-accepted-foreground',
   },
   REJECTED: {
-    label: 'Refusée',
+    label: L.REJECTED,
     plural: 'Refusées',
     className: 'bg-status-rejected text-status-rejected-foreground',
   },
