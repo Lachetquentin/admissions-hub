@@ -1,0 +1,101 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+/* Light only: `dark:` utilities in the shadcn components never apply. */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design charter "Registre" (mockups, direction A): the single source of the palette.
+ * shadcn components read the semantic variables; the business tokens (status, sync)
+ * are added below them.
+ */
+:root {
+  --radius: 0.5rem;
+
+  --background: #f6f6f3;
+  --foreground: #1a1d21;
+  --card: #ffffff;
+  --card-foreground: #1a1d21;
+  --popover: #ffffff;
+  --popover-foreground: #1a1d21;
+  --primary: #0e5e5a;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0ec;
+  --secondary-foreground: #1a1d21;
+  --muted: #fafaf8;
+  --muted-foreground: #5a6069;
+  --accent: #eaf2f1;
+  --accent-foreground: #0e5e5a;
+  --destructive: #962a22;
+  --border: #e3e3de;
+  --input: #cfcfc8;
+  --ring: #0e5e5a;
+}
+
+@theme inline {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+
+  /* Business tokens */
+  --color-faint: #9a9fa6;
+  --color-primary-hover: #0a4441;
+  --color-danger-soft: #fdf1ef;
+  --color-danger-line: #f0cfca;
+
+  --color-status-new: #eef0f3;
+  --color-status-new-foreground: #3d434b;
+  --color-status-reviewing: #fff1d1;
+  --color-status-reviewing-foreground: #7a4e00;
+  --color-status-accepted: #dff2e5;
+  --color-status-accepted-foreground: #1d6436;
+  --color-status-rejected: #fbe4e2;
+  --color-status-rejected-foreground: #962a22;
+
+  --color-sync-pending: #1f55b8;
+  --color-sync-pending-dot: #2f6fe0;
+  --color-sync-done-dot: #13827c;
+  --color-sync-failed-dot: #c2372b;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-sm text-foreground antialiased;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
