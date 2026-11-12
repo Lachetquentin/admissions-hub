@@ -15,7 +15,7 @@ import { notFound } from '../../lib/httpErrors';
 import { inScope } from '../../lib/scope';
 import { getSchool } from '../schools/schools.service';
 
-const toApplication = (row: ApplicationRow): Application => ({
+export const toApplication = (row: ApplicationRow): Application => ({
   ...row,
   lastSyncAt: row.lastSyncAt?.toISOString() ?? null,
   createdAt: row.createdAt.toISOString(),
@@ -75,11 +75,7 @@ export async function updateApplication(
   id: string,
   patch: ApplicationUpdate,
 ): Promise<Application> {
-  const [row] = await db
-    .update(applications)
-    .set(patch)
-    .where(byIdInScope(scope, id))
-    .returning();
+  const [row] = await db.update(applications).set(patch).where(byIdInScope(scope, id)).returning();
   if (!row) throw notFound('Application');
   return toApplication(row);
 }

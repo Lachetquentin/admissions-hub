@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { applicationInputSchema, applicationListQuerySchema, applicationUpdateSchema } from './application';
+import {
+  applicationInputSchema,
+  applicationListQuerySchema,
+  applicationUpdateSchema,
+} from './application';
 
 const valid = {
   schoolId: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
@@ -35,15 +39,20 @@ describe('applicationUpdateSchema', () => {
   });
 
   it('ignores schoolId so an application cannot change school', () => {
-    expect(applicationUpdateSchema.parse({ schoolId: valid.schoolId, status: 'ACCEPTED' })).toEqual({
-      status: 'ACCEPTED',
-    });
+    expect(applicationUpdateSchema.parse({ schoolId: valid.schoolId, status: 'ACCEPTED' })).toEqual(
+      {
+        status: 'ACCEPTED',
+      },
+    );
   });
 });
 
 describe('applicationListQuerySchema', () => {
   it('coerces pagination from query strings', () => {
-    expect(applicationListQuerySchema.parse({ page: '2', pageSize: '5' })).toEqual({ page: 2, pageSize: 5 });
+    expect(applicationListQuerySchema.parse({ page: '2', pageSize: '5' })).toEqual({
+      page: 2,
+      pageSize: 5,
+    });
   });
 
   it('caps pageSize', () => {

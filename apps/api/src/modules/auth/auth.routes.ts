@@ -30,7 +30,10 @@ authRouter.post('/login', async (req, res) => {
 });
 
 authRouter.get('/me', requireAuth, async (req, res) => {
-  const [user] = await db.select().from(users).where(eq(users.id, req.user?.sub ?? ''));
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, req.user?.sub ?? ''));
   if (!user) throw unauthorized('Account no longer exists');
   res.json(toAuthUser(user));
 });

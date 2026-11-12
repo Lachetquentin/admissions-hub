@@ -3,7 +3,9 @@ import { ApiRequestError, apiFetch, setUnauthorizedHandler, toQuery, tokenStore 
 import { apiFieldErrors } from '@/lib/formErrors';
 
 const respond = (status: number, body?: unknown) =>
-  vi.fn().mockResolvedValue(new Response(body === undefined ? null : JSON.stringify(body), { status }));
+  vi
+    .fn()
+    .mockResolvedValue(new Response(body === undefined ? null : JSON.stringify(body), { status }));
 
 beforeEach(() => tokenStore.clear());
 afterEach(() => vi.unstubAllGlobals());
@@ -13,16 +15,24 @@ describe('apiFetch', () => {
     tokenStore.set('jwt');
     const fetchMock = respond(201, { id: '1' });
     vi.stubGlobal('fetch', fetchMock);
-    await expect(apiFetch('/applications', { method: 'POST', body: { a: 1 } })).resolves.toEqual({ id: '1' });
+    await expect(apiFetch('/applications', { method: 'POST', body: { a: 1 } })).resolves.toEqual({
+      id: '1',
+    });
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('/api/applications');
-    expect(init.headers).toEqual({ Authorization: 'Bearer jwt', 'Content-Type': 'application/json' });
+    expect(init.headers).toEqual({
+      Authorization: 'Bearer jwt',
+      'Content-Type': 'application/json',
+    });
     expect(init.body).toBe('{"a":1}');
   });
 
   it('turns the API error format into an ApiRequestError with field details', async () => {
     const details = [{ path: 'email', message: 'Adresse e-mail invalide' }];
-    vi.stubGlobal('fetch', respond(400, { error: { code: 'VALIDATION_ERROR', message: 'Invalid request', details } }));
+    vi.stubGlobal(
+      'fetch',
+      respond(400, { error: { code: 'VALIDATION_ERROR', message: 'Invalid request', details } }),
+    );
     const error = await apiFetch('/applications').catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiRequestError);
     expect(error).toMatchObject({ status: 400, code: 'VALIDATION_ERROR' });
@@ -33,7 +43,10 @@ describe('apiFetch', () => {
     tokenStore.set('expired');
     const onUnauthorized = vi.fn();
     setUnauthorizedHandler(onUnauthorized);
-    vi.stubGlobal('fetch', respond(401, { error: { code: 'UNAUTHORIZED', message: 'Invalid or expired token' } }));
+    vi.stubGlobal(
+      'fetch',
+      respond(401, { error: { code: 'UNAUTHORIZED', message: 'Invalid or expired token' } }),
+    );
     await expect(apiFetch('/auth/me')).rejects.toThrow('Invalid or expired token');
     expect(onUnauthorized).toHaveBeenCalledOnce();
   });

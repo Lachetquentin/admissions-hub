@@ -58,7 +58,9 @@ export function LoginPage() {
               <h1 className="text-xl font-medium tracking-tight">Connexion</h1>
               <p className="text-muted-foreground">Accès réservé aux équipes admissions</p>
             </div>
-            {submitError !== null && <ErrorAlert title="Connexion impossible">{errorMessage(submitError)}</ErrorAlert>}
+            {submitError !== null && (
+              <ErrorAlert title="Connexion impossible">{errorMessage(submitError)}</ErrorAlert>
+            )}
             <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
               <FormField label="E-mail" error={errors.email}>
                 {(control) => (
@@ -88,7 +90,10 @@ export function LoginPage() {
             </form>
           </CardContent>
         </Card>
-        <section aria-labelledby="demo-title" className="flex flex-col gap-2 text-[13px] text-muted-foreground">
+        <section
+          aria-labelledby="demo-title"
+          className="flex flex-col gap-2 text-[13px] text-muted-foreground"
+        >
           <h2 id="demo-title" className="font-medium text-foreground">
             Comptes de démonstration
           </h2>

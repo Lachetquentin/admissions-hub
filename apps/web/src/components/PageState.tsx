@@ -5,7 +5,15 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /** Readable error block: a short title, an explanation, an optional technical line. */
-export function ErrorAlert({ title, children, meta }: { title: string; children?: ReactNode; meta?: string }) {
+export function ErrorAlert({
+  title,
+  children,
+  meta,
+}: {
+  title: string;
+  children?: ReactNode;
+  meta?: string;
+}) {
   return (
     <Alert variant="destructive" className="border-danger-line bg-danger-soft">
       <CircleAlert strokeWidth={1.5} />

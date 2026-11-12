@@ -9,7 +9,7 @@ import type {
 } from '@admissions-hub/shared';
 import { apiFetch, toQuery } from '../api/client';
 
-const keys = {
+export const applicationKeys = {
   lists: ['applications', 'list'] as const,
   list: (query: ApplicationListFilters) => ['applications', 'list', query] as const,
   detail: (id: string) => ['applications', 'detail', id] as const,
@@ -17,7 +17,7 @@ const keys = {
 
 export const useApplicationList = (query: ApplicationListFilters) =>
   useQuery({
-    queryKey: keys.list(query),
+    queryKey: applicationKeys.list(query),
     queryFn: () => apiFetch<ApplicationList>(`/applications${toQuery(query)}`),
     placeholderData: keepPreviousData,
   });
@@ -25,19 +25,19 @@ export const useApplicationList = (query: ApplicationListFilters) =>
 /** `enabled: false` stops fetching, e.g. once the record has just been deleted. */
 export const useApplication = (id: string | undefined, enabled = true) =>
   useQuery({
-    queryKey: keys.detail(id ?? ''),
+    queryKey: applicationKeys.detail(id ?? ''),
     queryFn: () => apiFetch<Application>(`/applications/${id}`),
     enabled: enabled && Boolean(id),
   });
 
-/** After a create/update, the saved detail is primed from the response and lists are refetched. */
-function useSaveApplication<TInput>(request: (input: TInput) => Promise<Application>) {
+/** After a create, update or sync, the saved detail is primed from the response and lists are refetched. */
+export function useSaveApplication<TInput>(request: (input: TInput) => Promise<Application>) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: request,
     onSuccess: (application) => {
-      queryClient.setQueryData(keys.detail(application.id), application);
-      return queryClient.invalidateQueries({ queryKey: keys.lists });
+      queryClient.setQueryData(applicationKeys.detail(application.id), application);
+      return queryClient.invalidateQueries({ queryKey: applicationKeys.lists });
     },
   });
 }
@@ -62,8 +62,8 @@ export function useDeleteApplication(onDeleted: () => void) {
     mutationFn: (id: string) => apiFetch<void>(`/applications/${id}`, { method: 'DELETE' }),
     onSuccess: (_, id) => {
       onDeleted();
-      queryClient.removeQueries({ queryKey: keys.detail(id) });
-      return queryClient.invalidateQueries({ queryKey: keys.lists });
+      queryClient.removeQueries({ queryKey: applicationKeys.detail(id) });
+      return queryClient.invalidateQueries({ queryKey: applicationKeys.lists });
     },
   });
 }

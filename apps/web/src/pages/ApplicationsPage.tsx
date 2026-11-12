@@ -6,8 +6,21 @@ import { SchoolTag, StatusBadge, SyncIndicator } from '@/components/StatusBadges
 import { StatusTiles } from '@/components/StatusTiles';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useApplicationList, useSchools } from '@/hooks/useApplications';
 import { useListFilters } from '@/hooks/useListFilters';
 import { formatDate } from '@/lib/labels';
@@ -41,7 +54,11 @@ export function ApplicationsPage() {
         </Button>
       </div>
 
-      <StatusTiles counts={list.data?.counts} selected={filters.status} onSelect={(status) => update({ status })} />
+      <StatusTiles
+        counts={list.data?.counts}
+        selected={filters.status}
+        onSelect={(status) => update({ status })}
+      />
 
       <div className="overflow-hidden rounded-xl border bg-card">
         {schools.length > 1 && (
@@ -52,7 +69,9 @@ export function ApplicationsPage() {
               </Label>
               <Select
                 value={filters.schoolId ?? ALL_SCHOOLS}
-                onValueChange={(value) => update({ schoolId: value === ALL_SCHOOLS ? undefined : value })}
+                onValueChange={(value) =>
+                  update({ schoolId: value === ALL_SCHOOLS ? undefined : value })
+                }
               >
                 <SelectTrigger id="school-filter" className="min-w-64">
                   <SelectValue />
@@ -77,7 +96,9 @@ export function ApplicationsPage() {
             <LoadError error={list.error} />
           </div>
         ) : list.data.items.length === 0 ? (
-          <p className="px-4 py-16 text-center text-muted-foreground">Aucune candidature pour ces filtres</p>
+          <p className="px-4 py-16 text-center text-muted-foreground">
+            Aucune candidature pour ces filtres
+          </p>
         ) : (
           <>
             <Table className="min-w-[960px]">
@@ -101,7 +122,9 @@ export function ApplicationsPage() {
                       >
                         {application.firstName} {application.lastName}
                       </Link>
-                      <div className="mt-0.5 text-[13px] text-muted-foreground">{application.email}</div>
+                      <div className="mt-0.5 text-[13px] text-muted-foreground">
+                        {application.email}
+                      </div>
                     </TableCell>
                     <TableCell className="px-4 py-3">
                       <SchoolTag slug={schoolById.get(application.schoolId)?.slug ?? '—'} />

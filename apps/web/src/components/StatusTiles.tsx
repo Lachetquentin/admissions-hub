@@ -1,4 +1,8 @@
-import { APPLICATION_STATUSES, type ApplicationStatus, type StatusCounts } from '@admissions-hub/shared';
+import {
+  APPLICATION_STATUSES,
+  type ApplicationStatus,
+  type StatusCounts,
+} from '@admissions-hub/shared';
 import { STATUS_META } from '@/lib/labels';
 import { cn } from '@/lib/utils';
 
@@ -13,11 +17,19 @@ export function StatusTiles({ counts, selected, onSelect }: Props) {
   const total = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : undefined;
   const tiles = [
     { key: undefined, label: 'Toutes', count: total },
-    ...APPLICATION_STATUSES.map((s) => ({ key: s, label: STATUS_META[s].plural, count: counts?.[s] })),
+    ...APPLICATION_STATUSES.map((s) => ({
+      key: s,
+      label: STATUS_META[s].plural,
+      count: counts?.[s],
+    })),
   ];
 
   return (
-    <div role="group" aria-label="Filtrer par statut" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <div
+      role="group"
+      aria-label="Filtrer par statut"
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+    >
       {tiles.map(({ key, label, count }) => {
         const active = key === selected;
         return (

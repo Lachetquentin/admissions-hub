@@ -29,7 +29,10 @@ export const setUnauthorizedHandler = (handler: () => void) => {
 
 type Options = { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown };
 
-export async function apiFetch<T>(path: string, { method = 'GET', body }: Options = {}): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  { method = 'GET', body }: Options = {},
+): Promise<T> {
   const token = tokenStore.get();
   const headers: Record<string, string> = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
@@ -43,7 +46,11 @@ export async function apiFetch<T>(path: string, { method = 'GET', body }: Option
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiRequestError(0, 'NETWORK_ERROR', 'Le serveur est injoignable. Réessayez dans un instant.');
+    throw new ApiRequestError(
+      0,
+      'NETWORK_ERROR',
+      'Le serveur est injoignable. Réessayez dans un instant.',
+    );
   }
 
   if (res.status === 204) return undefined as T;
