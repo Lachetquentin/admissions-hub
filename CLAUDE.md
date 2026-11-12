@@ -127,6 +127,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Sync status transitions only through `lib/syncStateMachine.ts` (documented in `docs/STATE_MACHINES.md`).
 - Out-of-scope ideas go to `docs/IDEAS.md`, never into code.
 - Demo deploys on Render from `render.yaml` with `SALESFORCE_ENABLED=false` (`docs/DEPLOY.md`).
-- UI: shadcn/ui (radix, `apps/web/src/components/ui`, add with `npx shadcn@latest add <name>` from `apps/web`). Design charter "Registre" (light, petrol `#0E5E5A`, IBM Plex): every colour is a token in `apps/web/src/index.css`, never a raw hex in components. French copy, sentence case, no trailing period on labels.
+- UI: shadcn/ui (radix, `apps/web/src/components/ui`, add with `npx shadcn@latest add <name>` from `apps/web`). Design charter "Registre" (light, petrol `#0E5E5A`, IBM Plex): every colour is a token in `apps/web/src/index.css`, never a raw hex in components. Sentence case, no trailing period on labels.
+- i18n: every UI string is a key in `apps/web/src/i18n/fr.ts` (reference) and `en.ts` (same keys, checked by `tsc`); shared schemas emit `validation.*` keys, API codes map to `apiErrors.*`. README.md (EN) and README.fr.md stay in sync, screenshots in `docs/images/{en,fr}`.
 - Front state: server data via TanStack Query hooks in `apps/web/src/hooks`; list filters live in the URL (`useListFilters`).
 - Secrets never committed: `.env.example` documents every variable, `config/env.ts` validates at startup.

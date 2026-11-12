@@ -1,64 +1,67 @@
 # Admissions Hub
 
-Portail interne qui centralise les candidatures de plusieurs écoles et les synchronise avec Salesforce.
-Chaque administrateur ne voit que son école ; l'administrateur groupe voit tout et pousse les candidats en Leads.
+**English** · [Français](README.fr.md)
+
+Internal portal that gathers the applications of several schools and syncs them with Salesforce.
+Each school administrator only sees their own school; the group administrator sees everything and pushes candidates to Salesforce as Leads.
 
 [![CI](https://github.com/Lachetquentin/admissions-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/Lachetquentin/admissions-hub/actions/workflows/ci.yml)
 
-**Démo : <https://admissions-hub.onrender.com>** — `groupe@admissions.test` / `admissions-demo`
-(ou `esc@`, `iin@`, `eda@admissions.test` pour un admin d'école). Salesforce y est désactivé ;
-la première requête peut prendre ~30 s (hébergement gratuit en veille).
+**Demo: <https://admissions-hub.onrender.com>** — `groupe@admissions.test` / `admissions-demo`
+(or `esc@`, `iin@`, `eda@admissions.test` for a school administrator). Salesforce is disabled there;
+the first request can take ~30 s (free hosting wakes up from sleep).
 
-![Liste des candidatures](docs/images/screenshot-list.png)
+![Applications list](docs/images/en/screenshot-list.png)
 
-![Candidature synchronisée avec Salesforce](docs/images/screenshot-detail.png)
+![Application synced with Salesforce](docs/images/en/screenshot-detail.png)
 
-## Fonctionnalités
+## Features
 
-- **Multi-écoles** : rôles `GROUP_ADMIN` (toutes les écoles) et `SCHOOL_ADMIN` (son école). L'isolation est appliquée par l'API : un admin d'école qui demande la candidature d'une autre école reçoit **404**.
-- **Candidatures** : liste paginée, compteurs par statut qui servent de filtre, filtre par école, création, édition, suppression avec confirmation. Validation par les mêmes schémas Zod côté front et API.
-- **Salesforce** : connexion de l'org par OAuth 2.0 Web Server Flow (PKCE), tokens chiffrés en base, rafraîchissement automatique, synchronisation idempotente de chaque candidature en **Lead**, erreurs Salesforce lisibles.
-- **API documentée** : OpenAPI 3.1 générée depuis les schémas Zod, Swagger UI sur `/docs`.
+- **Multi-school**: roles `GROUP_ADMIN` (every school) and `SCHOOL_ADMIN` (their own school). Isolation is enforced by the API: a school administrator asking for another school's application gets **404**.
+- **Applications**: paginated list, per-status counters that double as filters, school filter, create, edit, delete with confirmation. The front end and the API validate with the same Zod schemas.
+- **Salesforce**: org connection through the OAuth 2.0 Web Server Flow (PKCE), tokens encrypted at rest, automatic refresh, idempotent sync of each application to a **Lead**, readable Salesforce errors.
+- **Bilingual**: English and French UI (react-i18next), browser language by default, remembered EN / FR switcher.
+- **Documented API**: OpenAPI 3.1 generated from the Zod schemas, Swagger UI on `/docs`.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    subgraph Navigateur
+    subgraph Browser
         Web["React + Vite<br/>shadcn/ui, TanStack Query"]
     end
-    subgraph Serveur
-        Nginx["nginx<br/>fichiers statiques"]
-        API["API Express<br/>auth JWT · isolation par école<br/>validation Zod · OpenAPI"]
+    subgraph Server
+        Nginx["nginx<br/>static files"]
+        API["Express API<br/>JWT auth · school isolation<br/>Zod validation · OpenAPI"]
         DB[("PostgreSQL<br/>Drizzle, migrations")]
     end
     SF["Salesforce<br/>REST API · OAuth 2.0"]
-    Shared["packages/shared<br/>schémas Zod, types, enums"]
+    Shared["packages/shared<br/>Zod schemas, types, enums"]
 
-    Web -- "/api (même origine)" --> Nginx
+    Web -- "/api (same origin)" --> Nginx
     Nginx -- proxy --> API
     API --> DB
     API -- "Lead upsert, refresh token" --> SF
-    Shared -. importé par .-> Web
-    Shared -. importé par .-> API
+    Shared -. imported by .-> Web
+    Shared -. imported by .-> API
 ```
 
-Synchronisation d'une candidature : machine à états `NOT_SYNCED → PENDING → SYNCED | FAILED`
-documentée dans [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md).
+Syncing an application follows the state machine `NOT_SYNCED → PENDING → SYNCED | FAILED`,
+documented in [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md).
 
-## Lancer en local
+## Run locally
 
-Prérequis : Docker. Pour développer : Node.js 22+ (24 recommandé).
+Requirements: Docker. For development: Node.js 22+ (24 recommended).
 
-**Tout en un** (migrations et données de démo comprises) :
+**All in one** (migrations and demo data included):
 
 ```bash
 docker compose up --build
 ```
 
-→ <http://localhost:8080>. Les comptes de démo sont listés sur la page de connexion.
+→ <http://localhost:8080>. The demo accounts are listed on the login page.
 
-**En développement** (rechargement à chaud) :
+**Development** (hot reload):
 
 ```bash
 cp .env.example .env
@@ -68,54 +71,55 @@ npm run db:migrate && npm run db:seed
 npm run dev
 ```
 
-→ front sur <http://localhost:5173>, API sur <http://localhost:3000> (Swagger : <http://localhost:3000/docs>).
+→ front end on <http://localhost:5173>, API on <http://localhost:3000> (Swagger: <http://localhost:3000/docs>).
 
-## Configurer Salesforce
+## Set up Salesforce
 
-Résumé (guide complet, mapping des champs et dépannage : [`docs/SALESFORCE.md`](docs/SALESFORCE.md)) :
+Summary (full guide, field mapping and troubleshooting: [`docs/SALESFORCE.md`](docs/SALESFORCE.md)):
 
-1. Créer une org [Developer Edition](https://developer.salesforce.com/signup) gratuite.
-2. Setup → **External Client App Manager** → nouvelle app avec OAuth activé, callback
-   `http://localhost:3000/api/integrations/salesforce/callback`, scopes `api` et `refresh_token, offline_access`.
-3. Dans `.env` : `SALESFORCE_ENABLED=true`, `SALESFORCE_CLIENT_ID`, `SALESFORCE_CLIENT_SECRET`,
-   `TOKEN_ENCRYPTION_KEY` (32 octets en base64). L'API refuse de démarrer si une valeur manque.
-4. Se connecter en `groupe@admissions.test` → en-tête **Connecter** → autoriser l'accès dans Salesforce.
-5. Ouvrir une candidature → **Synchroniser** : le Lead apparaît dans Salesforce (Company = école).
+1. Create a free [Developer Edition](https://developer.salesforce.com/signup) org.
+2. Setup → **External Client App Manager** → new app with OAuth enabled, callback
+   `http://localhost:3000/api/integrations/salesforce/callback`, scopes `api` and `refresh_token, offline_access`.
+3. In `.env`: `SALESFORCE_ENABLED=true`, `SALESFORCE_CLIENT_ID`, `SALESFORCE_CLIENT_SECRET`,
+   `TOKEN_ENCRYPTION_KEY` (32 bytes, base64). The API refuses to start if a value is missing.
+4. Log in as `groupe@admissions.test` → header **Connect** → allow access in Salesforce.
+5. Open an application → **Sync**: the Lead shows up in Salesforce (Company = school).
 
-## Qualité
+## Quality
 
-| Commande                | Rôle                                                                       |
-| ----------------------- | -------------------------------------------------------------------------- |
-| `npm run lint`          | ESLint (TypeScript, règles React Hooks)                                    |
-| `npm run typecheck`     | `tsc --noEmit` sur les trois workspaces                                    |
-| `npm test`              | Vitest : unitaires + intégration Supertest sur une base PostgreSQL de test |
-| `npm run test:coverage` | Rapports de couverture (HTML dans `*/coverage/`)                           |
+| Command                 | Purpose                                                                   |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `npm run lint`          | ESLint (TypeScript, React Hooks rules)                                    |
+| `npm run typecheck`     | `tsc --noEmit` across the three workspaces                                |
+| `npm test`              | Vitest: unit + Supertest integration tests against a test PostgreSQL base |
+| `npm run test:coverage` | Coverage reports (HTML in `*/coverage/`)                                  |
 
-La CI GitHub Actions lance lint, typecheck, tests avec couverture (service PostgreSQL) et build à chaque PR.
-Seuil de couverture de l'API : 85 % (actuellement ~96 % des lignes). Aucun appel réseau vers Salesforce
-dans les tests : le client est derrière une interface, mocké.
+GitHub Actions CI runs lint, typecheck, tests with coverage (PostgreSQL service) and build on every PR.
+API coverage threshold: 85 % (currently ~96 % of lines). The tests make no network call to Salesforce:
+the client sits behind an interface and is mocked.
 
-## Choix techniques
+## Technical choices
 
-| Choix                                           | Pourquoi                                                                                                                                        |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Monorepo npm workspaces** + `packages/shared` | Un seul schéma Zod par entité : validation du formulaire, validation de l'API et documentation OpenAPI ne peuvent pas diverger.                 |
-| **Drizzle** plutôt que Prisma                   | Schéma en TypeScript, migrations SQL lisibles, pas de moteur binaire : image Docker légère et CI rapide.                                        |
-| **Isolation dans l'API** (`schoolScope`)        | Le filtre par école est ajouté à chaque requête SQL ; le front n'est jamais une barrière de sécurité. 404 plutôt que 403 pour ne rien révéler.  |
-| **OAuth avec PKCE et `state` signé**            | Le `state` est un JWT court lié à l'admin qui lance la connexion et transporte le vérificateur PKCE chiffré : pas de session serveur à stocker. |
-| **Tokens chiffrés AES-256-GCM**                 | Le refresh token donne accès à l'org : jamais en clair en base.                                                                                 |
-| **Transitions de synchro gardées en SQL**       | `UPDATE … WHERE sync_status IN (états autorisés)` : deux synchros concurrentes ne peuvent pas démarrer ensemble.                                |
-| **Client Salesforce injectable**                | `createApp({ salesforce })` : mock en test, client HTTP en production.                                                                          |
-| **shadcn/ui + Tailwind v4**                     | Composants accessibles (Radix) sur une charte maison : tous les tons sont des tokens CSS, aucune couleur en dur.                                |
-| **Render** pour la démo                         | Service Docker, PostgreSQL et site statique gratuits décrits dans un seul `render.yaml`, voir [`docs/DEPLOY.md`](docs/DEPLOY.md).               |
+| Choice                                          | Why                                                                                                                                         |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **npm workspaces monorepo** + `packages/shared` | One Zod schema per entity: form validation, API validation and OpenAPI docs cannot drift apart.                                             |
+| **Drizzle** over Prisma                         | TypeScript schema, readable SQL migrations, no binary engine: small Docker image and fast CI.                                               |
+| **Isolation in the API** (`schoolScope`)        | The school filter is added to every SQL query; the front end is never a security boundary. 404 rather than 403 so nothing leaks.            |
+| **OAuth with PKCE and a signed `state`**        | The `state` is a short-lived JWT bound to the admin who starts the connection, carrying the encrypted PKCE verifier: no server session.     |
+| **AES-256-GCM encrypted tokens**                | The refresh token grants access to the org: never stored in clear text.                                                                     |
+| **Sync transitions guarded in SQL**             | `UPDATE … WHERE sync_status IN (allowed states)`: two concurrent syncs cannot start together.                                               |
+| **Injectable Salesforce client**                | `createApp({ salesforce })`: a mock in tests, the HTTP client in production.                                                                |
+| **shadcn/ui + Tailwind v4**                     | Accessible components (Radix) on a custom charter: every tone is a CSS token, no hard-coded colour.                                         |
+| **i18n with typed dictionaries**                | French is the reference dictionary and English must have the same keys (checked by `tsc`); shared schemas emit message keys, not sentences. |
+| **Render** for the demo                         | Free Docker service, PostgreSQL and static site described in one `render.yaml`, see [`docs/DEPLOY.md`](docs/DEPLOY.md).                     |
 
 ## Structure
 
 ```
-apps/api        API Express (modules auth, schools, applications, salesforce)
-apps/web        Front React (pages, hooks, composants, shadcn/ui)
-packages/shared Schémas Zod, types et libellés partagés
-docs/           Machines à états, Salesforce, déploiement, idées hors périmètre
+apps/api        Express API (auth, schools, applications, salesforce modules)
+apps/web        React front end (pages, hooks, components, shadcn/ui, i18n)
+packages/shared Shared Zod schemas, types and enums
+docs/           State machines, Salesforce, deployment, out-of-scope ideas
 ```
 
-Idées volontairement non développées : [`docs/IDEAS.md`](docs/IDEAS.md).
+Ideas deliberately left out: [`docs/IDEAS.md`](docs/IDEAS.md).

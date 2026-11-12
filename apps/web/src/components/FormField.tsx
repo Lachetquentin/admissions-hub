@@ -1,6 +1,7 @@
 import { CircleAlert } from 'lucide-react';
 import { useId, type ReactNode } from 'react';
 import { Label } from '@/components/ui/label';
+import { translateMessage } from '@/lib/messages';
 
 type ControlProps = { id: string; 'aria-invalid'?: true; 'aria-describedby'?: string };
 
@@ -12,7 +13,10 @@ type Props = {
   children: (control: ControlProps) => ReactNode;
 };
 
-/** Visible label, control, then the error (or a hint) right under it. */
+/**
+ * Visible label, control, then the error (or a hint) right under it.
+ * `error` may be a shared validation key (`validation.email`): it is translated here.
+ */
 export function FormField({ label, error, hint, children }: Props) {
   const id = useId();
   const messageId = `${id}-message`;
@@ -27,7 +31,7 @@ export function FormField({ label, error, hint, children }: Props) {
       {error ? (
         <p id={messageId} className="flex items-center gap-1.5 text-[13px] text-destructive">
           <CircleAlert aria-hidden="true" className="size-3.5" strokeWidth={1.5} />
-          {error}
+          {translateMessage(error)}
         </p>
       ) : (
         hint && (

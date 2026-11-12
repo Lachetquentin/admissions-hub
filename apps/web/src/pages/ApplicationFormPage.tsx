@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
 import {
@@ -10,7 +11,7 @@ import {
 } from '@admissions-hub/shared';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { FormField } from '@/components/FormField';
-import { ErrorAlert, LoadError, LoadingRows, errorMessage } from '@/components/PageState';
+import { ErrorAlert, LoadError, LoadingRows } from '@/components/PageState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,7 +30,7 @@ import {
 } from '@/hooks/useApplications';
 import { useAuth } from '@/hooks/useAuth';
 import { apiFieldErrors, zodFieldErrors, type FieldErrors } from '@/lib/formErrors';
-import { STATUS_META } from '@/lib/labels';
+import { errorMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 
 type Values = {
@@ -43,10 +44,10 @@ type Values = {
 };
 
 const TEXT_FIELDS = [
-  { name: 'firstName', label: 'Prénom', autoComplete: 'off' },
-  { name: 'lastName', label: 'Nom', autoComplete: 'off' },
-  { name: 'email', label: 'E-mail', type: 'email', autoComplete: 'off' },
-  { name: 'phone', label: 'Téléphone', type: 'tel', autoComplete: 'off' },
+  { name: 'firstName', autoComplete: 'off' },
+  { name: 'lastName', autoComplete: 'off' },
+  { name: 'email', type: 'email', autoComplete: 'off' },
+  { name: 'phone', type: 'tel', autoComplete: 'off' },
 ] as const;
 
 /** /applications/new and /applications/:id/edit */
@@ -61,6 +62,7 @@ export function ApplicationFormPage() {
 }
 
 function ApplicationForm({ application }: { application?: Application }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: schools = [] } = useSchools();
@@ -96,7 +98,7 @@ function ApplicationForm({ application }: { application?: Application }) {
   const set = <K extends keyof Values>(key: K, value: Values[K]) =>
     setValues((v) => ({ ...v, [key]: value }));
   const pending = create.isPending || update.isPending;
-  const title = isEdit ? 'Modifier la candidature' : 'Nouvelle candidature';
+  const title = isEdit ? t('form.editTitle') : t('form.createTitle');
   const fullName = application ? `${application.firstName} ${application.lastName}` : '';
 
   const showFieldErrors = (fieldErrors: FieldErrors) => {
@@ -123,7 +125,7 @@ function ApplicationForm({ application }: { application?: Application }) {
     setErrors({});
     try {
       const saved = await request;
-      toast.success(isEdit ? 'Candidature enregistrée' : 'Candidature créée');
+      toast.success(isEdit ? t('form.saved') : t('form.created'));
       navigate(`/applications/${saved.id}`);
     } catch (error) {
       const fieldErrors = apiFieldErrors(error);
@@ -138,16 +140,16 @@ function ApplicationForm({ application }: { application?: Application }) {
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <Breadcrumb
         items={[
-          { label: 'Candidatures', to: '/applications' },
+          { label: t('nav.applications'), to: '/applications' },
           ...(isEdit
-            ? [{ label: fullName, to: cancelTo }, { label: 'Modifier' }]
-            : [{ label: 'Nouvelle' }]),
+            ? [{ label: fullName, to: cancelTo }, { label: t('common.edit') }]
+            : [{ label: t('form.newCrumb') }]),
         ]}
       />
       <h1 className="text-[28px] font-medium tracking-tight">{title}</h1>
 
       {submitError !== null && (
-        <ErrorAlert title="Enregistrement impossible">{errorMessage(submitError)}</ErrorAlert>
+        <ErrorAlert title={t('form.saveFailed')}>{errorMessage(submitError)}</ErrorAlert>
       )}
 
       <Card>
@@ -155,7 +157,11 @@ function ApplicationForm({ application }: { application?: Application }) {
           <form ref={formRef} noValidate onSubmit={onSubmit} className="flex flex-col gap-6">
             <div className="grid gap-6 sm:grid-cols-2">
               {TEXT_FIELDS.map((field) => (
-                <FormField key={field.name} label={field.label} error={errors[field.name]}>
+                <FormField
+                  key={field.name}
+                  label={t(`form.${field.name}`)}
+                  error={errors[field.name]}
+                >
                   {(control) => (
                     <Input
                       {...control}
@@ -169,9 +175,9 @@ function ApplicationForm({ application }: { application?: Application }) {
               ))}
 
               <FormField
-                label="École"
+                label={t('form.school')}
                 error={errors.schoolId}
-                hint={isEdit ? "Une candidature ne change pas d'école" : undefined}
+                hint={isEdit ? t('form.schoolLocked') : undefined}
               >
                 {(control) => (
                   <Select
@@ -180,7 +186,7 @@ function ApplicationForm({ application }: { application?: Application }) {
                     disabled={isEdit || schools.length <= 1}
                   >
                     <SelectTrigger {...control} className="w-full">
-                      <SelectValue placeholder="Choisir une école" />
+                      <SelectValue placeholder={t('form.schoolPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {schools.map((school) => (
@@ -193,7 +199,7 @@ function ApplicationForm({ application }: { application?: Application }) {
                 )}
               </FormField>
 
-              <FormField label="Programme visé" error={errors.program}>
+              <FormField label={t('form.program')} error={errors.program}>
                 {(control) => (
                   <Input
                     {...control}
@@ -205,7 +211,7 @@ function ApplicationForm({ application }: { application?: Application }) {
             </div>
 
             <fieldset className="flex flex-col gap-3">
-              <legend className="mb-3 text-sm font-medium">Statut</legend>
+              <legend className="mb-3 text-sm font-medium">{t('form.status')}</legend>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {APPLICATION_STATUSES.map((status) => {
                   const checked = values.status === status;
@@ -226,7 +232,7 @@ function ApplicationForm({ application }: { application?: Application }) {
                         onChange={() => set('status', status)}
                         className="size-4 accent-primary"
                       />
-                      {STATUS_META[status].label}
+                      {t(`status.${status}.one`)}
                     </label>
                   );
                 })}
@@ -235,10 +241,10 @@ function ApplicationForm({ application }: { application?: Application }) {
 
             <div className="flex flex-wrap justify-end gap-2 border-t pt-6">
               <Button asChild variant="outline" size="lg">
-                <Link to={cancelTo}>Annuler</Link>
+                <Link to={cancelTo}>{t('common.cancel')}</Link>
               </Button>
               <Button type="submit" size="lg" disabled={pending}>
-                {pending ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer la candidature'}
+                {pending ? t('common.saving') : isEdit ? t('common.save') : t('form.create')}
               </Button>
             </div>
           </form>

@@ -36,7 +36,7 @@ async function transition(id: string, to: SyncStatus, fields: SyncFields = {}) {
 const readableError = (error: unknown): string =>
   error instanceof SalesforceError
     ? `${error.message} (${error.code})`
-    : 'Erreur interne pendant la synchronisation, réessayez plus tard';
+    : 'Internal error during the synchronisation, please retry later';
 
 /**
  * POST /applications/:id/sync — creates or updates the candidate's Lead.

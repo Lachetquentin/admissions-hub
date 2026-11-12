@@ -1,22 +1,26 @@
 import type { ApplicationStatus, SyncStatus } from '@admissions-hub/shared';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
-import { STATUS_META, SYNC_META } from '@/lib/labels';
+import { STATUS_STYLE, SYNC_STYLE } from '@/lib/labels';
 import { cn } from '@/lib/utils';
 
 export function StatusBadge({ status }: { status: ApplicationStatus }) {
-  const meta = STATUS_META[status];
+  const { t } = useTranslation();
   return (
-    <Badge className={cn('border-transparent font-medium', meta.className)}>{meta.label}</Badge>
+    <Badge className={cn('border-transparent font-medium', STATUS_STYLE[status])}>
+      {t(`status.${status}.one`)}
+    </Badge>
   );
 }
 
 /** Signature of the app: a status dot next to the Salesforce sync state. */
-export function SyncIndicator({ status, label }: { status: SyncStatus; label?: string }) {
-  const meta = SYNC_META[status];
+export function SyncIndicator({ status }: { status: SyncStatus }) {
+  const { t } = useTranslation();
+  const style = SYNC_STYLE[status];
   return (
-    <span className={cn('inline-flex items-center gap-2 text-[13px]', meta.text)}>
-      <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', meta.dot)} />
-      {label ?? meta.label}
+    <span className={cn('inline-flex items-center gap-2 text-[13px]', style.text)}>
+      <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', style.dot)} />
+      {t(`sync.${status}`)}
     </span>
   );
 }

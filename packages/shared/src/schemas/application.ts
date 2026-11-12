@@ -1,20 +1,21 @@
 import { z } from 'zod';
 import { idSchema, isoDateSchema, paginatedSchema, paginationQuerySchema } from './common';
 import { applicationStatusSchema, syncStatusSchema } from '../enums';
+import { VALIDATION } from './validation';
 
 const requiredText = (max: number) =>
-  z.string().trim().min(1, 'Champ requis').max(max, `${max} caractères maximum`);
+  z.string().trim().min(1, VALIDATION.required).max(max, VALIDATION.tooLong);
 
 /** Fields an admin can write. Shared by the create/edit form and the API. */
 export const applicationInputSchema = z.object({
   schoolId: idSchema,
   firstName: requiredText(100),
   lastName: requiredText(100),
-  email: z.email('Adresse e-mail invalide').trim().toLowerCase().max(254),
+  email: z.email(VALIDATION.email).trim().toLowerCase().max(254),
   phone: z
     .string()
     .trim()
-    .regex(/^\+?[0-9 ().-]{6,20}$/, 'Numéro de téléphone invalide'),
+    .regex(/^\+?[0-9 ().-]{6,20}$/, VALIDATION.phone),
   program: requiredText(150),
   status: applicationStatusSchema.default('NEW'),
 });
@@ -26,7 +27,7 @@ export const applicationUpdateSchema = applicationInputSchema
   .omit({ schoolId: true })
   .extend({ status: applicationStatusSchema })
   .partial()
-  .refine((value) => Object.keys(value).length > 0, 'Au moins un champ est requis');
+  .refine((value) => Object.keys(value).length > 0, VALIDATION.emptyPatch);
 export type ApplicationUpdate = z.infer<typeof applicationUpdateSchema>;
 
 export const applicationSchema = z.object({
