@@ -1,8 +1,9 @@
 import { Link, useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
 import { DetailList } from '@/components/DetailList';
-import { ErrorAlert, LoadError, LoadingRows, errorMessage } from '@/components/PageState';
-import { StatusBadge, SyncIndicator } from '@/components/StatusBadges';
+import { LoadError, LoadingRows, errorMessage } from '@/components/PageState';
+import { SalesforceSyncCard } from '@/components/SalesforceSyncCard';
+import { StatusBadge } from '@/components/StatusBadges';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,13 +64,17 @@ export function ApplicationDetailPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Supprimer cette candidature ?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  La candidature de {fullName} sera définitivement supprimée d'Admissions Hub. Un Lead déjà
-                  créé dans Salesforce n'est pas supprimé.
+                  La candidature de {fullName} sera définitivement supprimée d'Admissions Hub. Un
+                  Lead déjà créé dans Salesforce n'est pas supprimé.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction variant="destructive" onClick={onDelete} disabled={remove.isPending}>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={onDelete}
+                  disabled={remove.isPending}
+                >
                   Supprimer
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -92,7 +97,10 @@ export function ApplicationDetailPage() {
                 {
                   label: 'E-mail',
                   value: (
-                    <a href={`mailto:${a.email}`} className="text-primary underline-offset-4 hover:underline">
+                    <a
+                      href={`mailto:${a.email}`}
+                      className="text-primary underline-offset-4 hover:underline"
+                    >
                       {a.email}
                     </a>
                   ),
@@ -107,38 +115,7 @@ export function ApplicationDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
-            <CardTitle>Salesforce</CardTitle>
-            <SyncIndicator status={a.syncStatus} />
-          </CardHeader>
-          <CardContent className="flex flex-col gap-5">
-            {a.syncStatus === 'FAILED' && a.lastSyncError && (
-              <ErrorAlert
-                title="Salesforce a refusé la synchronisation"
-                meta={a.lastSyncAt ? formatDateTime(a.lastSyncAt) : undefined}
-              >
-                {a.lastSyncError}
-              </ErrorAlert>
-            )}
-            <DetailList
-              items={[
-                {
-                  label: 'Lead Salesforce',
-                  value: a.salesforceId ? (
-                    <span className="font-mono text-[13px]">{a.salesforceId}</span>
-                  ) : (
-                    <span className="text-muted-foreground">Pas encore créé</span>
-                  ),
-                },
-                {
-                  label: 'Dernière synchro',
-                  value: a.lastSyncAt ? formatDateTime(a.lastSyncAt) : <span className="text-muted-foreground">Jamais</span>,
-                },
-              ]}
-            />
-          </CardContent>
-        </Card>
+        <SalesforceSyncCard application={a} />
       </div>
     </div>
   );

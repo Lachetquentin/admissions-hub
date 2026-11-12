@@ -10,7 +10,10 @@ export function Breadcrumb({ items }: { items: Item[] }) {
           <li key={item.label} className="flex items-center gap-1.5">
             {i > 0 && <span aria-hidden="true">/</span>}
             {item.to ? (
-              <Link to={item.to} className="rounded-sm text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50">
+              <Link
+                to={item.to}
+                className="rounded-sm text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
                 {item.label}
               </Link>
             ) : (

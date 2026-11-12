@@ -21,4 +21,5 @@ export function pageItems(current: number, totalPages: number, siblings = 1): Pa
   return items;
 }
 
-export const totalPages = (total: number, pageSize: number) => Math.max(1, Math.ceil(total / pageSize));
+export const totalPages = (total: number, pageSize: number) =>
+  Math.max(1, Math.ceil(total / pageSize));

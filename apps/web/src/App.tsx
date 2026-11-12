@@ -12,7 +12,8 @@ function RequireAuth() {
   const { status } = useAuth();
   const location = useLocation();
   if (status === 'loading') return <LoadingRows />;
-  if (status === 'anonymous') return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  if (status === 'anonymous')
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   return <Outlet />;
 }
 
@@ -20,7 +21,9 @@ function NotFound() {
   return (
     <div className="flex flex-col gap-2 py-16 text-center">
       <h1 className="text-xl font-medium">Page introuvable</h1>
-      <p className="text-muted-foreground">Cette adresse ne correspond à aucune page d'Admissions Hub</p>
+      <p className="text-muted-foreground">
+        Cette adresse ne correspond à aucune page d'Admissions Hub
+      </p>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**', 'apps/api/src/db/migrations/**'] },
+  { ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**', '**/.vite/**', 'apps/api/src/db/migrations/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -15,7 +15,13 @@ export function Pagination({ page, pageSize, total, onChange }: Props) {
         {first}–{last} sur {total} · page {page} sur {pages}
       </span>
       <nav aria-label="Pagination" className="flex gap-1">
-        <Button variant="outline" size="icon" aria-label="Page précédente" disabled={page <= 1} onClick={() => onChange(page - 1)}>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Page précédente"
+          disabled={page <= 1}
+          onClick={() => onChange(page - 1)}
+        >
           <ChevronLeft strokeWidth={1.5} />
         </Button>
         {pageItems(page, pages).map((item, i) =>
@@ -37,7 +43,13 @@ export function Pagination({ page, pageSize, total, onChange }: Props) {
             </Button>
           ),
         )}
-        <Button variant="outline" size="icon" aria-label="Page suivante" disabled={page >= pages} onClick={() => onChange(page + 1)}>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Page suivante"
+          disabled={page >= pages}
+          onClick={() => onChange(page + 1)}
+        >
           <ChevronRight strokeWidth={1.5} />
         </Button>
       </nav>

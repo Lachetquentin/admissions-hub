@@ -5,6 +5,7 @@ import { useSchools } from '@/hooks/useApplications';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { Logo } from './Logo';
+import { SalesforceConnection } from './SalesforceConnection';
 
 const initials = (name: string) =>
   name
@@ -26,7 +27,10 @@ export function AppLayout() {
     <div className="min-h-screen">
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-8">
-          <Link to="/applications" className="rounded-md text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+          <Link
+            to="/applications"
+            className="rounded-md text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
             <Logo />
           </Link>
           <nav aria-label="Navigation principale" className="flex gap-1">
@@ -35,7 +39,9 @@ export function AppLayout() {
               className={({ isActive }) =>
                 cn(
                   'rounded-md px-3 py-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-                  isActive ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground',
+                  isActive
+                    ? 'bg-accent font-medium text-accent-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )
               }
             >
@@ -43,16 +49,26 @@ export function AppLayout() {
             </NavLink>
           </nav>
           <div className="grow" />
+          <SalesforceConnection />
           {user && (
             <div className="flex items-center gap-3">
-              <span aria-hidden="true" className="grid size-8 place-items-center rounded-full bg-foreground text-xs font-medium text-background">
+              <span
+                aria-hidden="true"
+                className="grid size-8 place-items-center rounded-full bg-foreground text-xs font-medium text-background"
+              >
                 {initials(user.name)}
               </span>
               <span className="flex flex-col leading-tight">
                 <span className="font-medium">{user.name}</span>
                 <span className="text-xs text-muted-foreground">{scopeLabel}</span>
               </span>
-              <Button variant="ghost" size="icon" onClick={logout} aria-label="Se déconnecter" title="Se déconnecter">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={logout}
+                aria-label="Se déconnecter"
+                title="Se déconnecter"
+              >
                 <LogOut strokeWidth={1.5} />
               </Button>
             </div>

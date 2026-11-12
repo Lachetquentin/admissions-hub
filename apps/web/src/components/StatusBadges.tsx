@@ -5,7 +5,9 @@ import { cn } from '@/lib/utils';
 
 export function StatusBadge({ status }: { status: ApplicationStatus }) {
   const meta = STATUS_META[status];
-  return <Badge className={cn('border-transparent font-medium', meta.className)}>{meta.label}</Badge>;
+  return (
+    <Badge className={cn('border-transparent font-medium', meta.className)}>{meta.label}</Badge>
+  );
 }
 
 /** Signature of the app: a status dot next to the Salesforce sync state. */

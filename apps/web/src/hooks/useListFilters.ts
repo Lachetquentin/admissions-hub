@@ -23,7 +23,8 @@ export function useListFilters() {
     if (next.schoolId) search.set('schoolId', next.schoolId);
     if (next.status) search.set('status', next.status);
     if (next.page && next.page > 1) search.set('page', String(next.page));
-    if (next.pageSize && next.pageSize !== PAGE_SIZE_DEFAULT) search.set('pageSize', String(next.pageSize));
+    if (next.pageSize && next.pageSize !== PAGE_SIZE_DEFAULT)
+      search.set('pageSize', String(next.pageSize));
     setParams(search);
   };
 

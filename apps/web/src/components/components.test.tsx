@@ -11,8 +11,14 @@ describe('StatusTiles', () => {
 
   it('shows the total and one counter per status', () => {
     render(<StatusTiles counts={counts} selected={undefined} onSelect={() => {}} />);
-    expect(screen.getByRole('button', { name: 'Toutes (10)' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Acceptées (2)' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Toutes (10)' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: 'Acceptées (2)' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('filters by the clicked status, and "Toutes" clears the filter', async () => {
@@ -43,14 +49,22 @@ describe('Pagination', () => {
 
 describe('FormField', () => {
   it('links the label and announces the error with the field', () => {
-    render(<FormField label="E-mail" error="Adresse e-mail invalide">{(control) => <Input {...control} />}</FormField>);
+    render(
+      <FormField label="E-mail" error="Adresse e-mail invalide">
+        {(control) => <Input {...control} />}
+      </FormField>,
+    );
     const input = screen.getByLabelText('E-mail');
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAccessibleDescription('Adresse e-mail invalide');
   });
 
   it('is valid and uses the hint as description when there is no error', () => {
-    render(<FormField label="École" hint="Une candidature ne change pas d'école">{(control) => <Input {...control} />}</FormField>);
+    render(
+      <FormField label="École" hint="Une candidature ne change pas d'école">
+        {(control) => <Input {...control} />}
+      </FormField>,
+    );
     const input = screen.getByLabelText('École');
     expect(input).not.toHaveAttribute('aria-invalid');
     expect(input).toHaveAccessibleDescription("Une candidature ne change pas d'école");

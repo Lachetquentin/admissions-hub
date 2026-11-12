@@ -14,8 +14,19 @@ import { ErrorAlert, LoadError, LoadingRows, errorMessage } from '@/components/P
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useApplication, useCreateApplication, useSchools, useUpdateApplication } from '@/hooks/useApplications';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  useApplication,
+  useCreateApplication,
+  useSchools,
+  useUpdateApplication,
+} from '@/hooks/useApplications';
 import { useAuth } from '@/hooks/useAuth';
 import { apiFieldErrors, zodFieldErrors, type FieldErrors } from '@/lib/formErrors';
 import { STATUS_META } from '@/lib/labels';
@@ -78,10 +89,12 @@ function ApplicationForm({ application }: { application?: Application }) {
 
   // A SCHOOL_ADMIN only sees their school: preselect it.
   useEffect(() => {
-    if (!values.schoolId && schools.length === 1) setValues((v) => ({ ...v, schoolId: schools[0]!.id }));
+    if (!values.schoolId && schools.length === 1)
+      setValues((v) => ({ ...v, schoolId: schools[0]!.id }));
   }, [schools, values.schoolId]);
 
-  const set = <K extends keyof Values>(key: K, value: Values[K]) => setValues((v) => ({ ...v, [key]: value }));
+  const set = <K extends keyof Values>(key: K, value: Values[K]) =>
+    setValues((v) => ({ ...v, [key]: value }));
   const pending = create.isPending || update.isPending;
   const title = isEdit ? 'Modifier la candidature' : 'Nouvelle candidature';
   const fullName = application ? `${application.firstName} ${application.lastName}` : '';
@@ -126,12 +139,16 @@ function ApplicationForm({ application }: { application?: Application }) {
       <Breadcrumb
         items={[
           { label: 'Candidatures', to: '/applications' },
-          ...(isEdit ? [{ label: fullName, to: cancelTo }, { label: 'Modifier' }] : [{ label: 'Nouvelle' }]),
+          ...(isEdit
+            ? [{ label: fullName, to: cancelTo }, { label: 'Modifier' }]
+            : [{ label: 'Nouvelle' }]),
         ]}
       />
       <h1 className="text-[28px] font-medium tracking-tight">{title}</h1>
 
-      {submitError !== null && <ErrorAlert title="Enregistrement impossible">{errorMessage(submitError)}</ErrorAlert>}
+      {submitError !== null && (
+        <ErrorAlert title="Enregistrement impossible">{errorMessage(submitError)}</ErrorAlert>
+      )}
 
       <Card>
         <CardContent>
@@ -178,7 +195,11 @@ function ApplicationForm({ application }: { application?: Application }) {
 
               <FormField label="Programme visé" error={errors.program}>
                 {(control) => (
-                  <Input {...control} value={values.program} onChange={(e) => set('program', e.target.value)} />
+                  <Input
+                    {...control}
+                    value={values.program}
+                    onChange={(e) => set('program', e.target.value)}
+                  />
                 )}
               </FormField>
             </div>
