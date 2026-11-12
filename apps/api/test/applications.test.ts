@@ -57,7 +57,9 @@ describe('GET /api/applications', () => {
   });
 
   it('filters by school and status', async () => {
-    const res = await group.get(`/api/applications?schoolId=${iin.id}&status=ACCEPTED&pageSize=100`);
+    const res = await group.get(
+      `/api/applications?schoolId=${iin.id}&status=ACCEPTED&pageSize=100`,
+    );
     expect(res.body.total).toBeGreaterThan(0);
     for (const a of res.body.items as Application[]) {
       expect(a).toMatchObject({ schoolId: iin.id, status: 'ACCEPTED' });

@@ -15,7 +15,7 @@ const lead: LeadFields = {
   Description: '',
 };
 const tokens: SalesforceTokens = {
-  instanceUrl: 'https://acme.my.salesforce.test',
+  instanceUrl: 'https://acme.my.salesforce.com',
   accessToken: 'old-access',
   refreshToken: 'refresh',
 };
@@ -47,7 +47,7 @@ describe('HTTP Salesforce client', () => {
     const { client, fetchMock } = setup([json(201, { id: '00Q000000000001AAA', success: true })]);
     await expect(client.upsertLead(lead, null)).resolves.toBe('00Q000000000001AAA');
     expect(call(fetchMock, 0)).toMatchObject({
-      url: 'https://acme.my.salesforce.test/services/data/v62.0/sobjects/Lead',
+      url: 'https://acme.my.salesforce.com/services/data/v62.0/sobjects/Lead',
       method: 'POST',
       auth: 'Bearer old-access',
       body: JSON.stringify(lead),
@@ -75,7 +75,7 @@ describe('HTTP Salesforce client', () => {
   it('refreshes an expired access token once, stores it and retries', async () => {
     const { client, fetchMock, store } = setup([
       json(401, [{ message: 'Session expired or invalid', errorCode: 'INVALID_SESSION_ID' }]),
-      json(200, { access_token: 'new-access', instance_url: 'https://acme.my.salesforce.test' }),
+      json(200, { access_token: 'new-access', instance_url: 'https://acme.my.salesforce.com' }),
       json(201, { id: '00Q000000000003AAA' }),
     ]);
     await expect(client.upsertLead(lead, null)).resolves.toBe('00Q000000000003AAA');
@@ -83,7 +83,7 @@ describe('HTTP Salesforce client', () => {
     expect(String(call(fetchMock, 1).body)).toContain('grant_type=refresh_token');
     expect(store.saveAccessToken).toHaveBeenCalledWith(
       'new-access',
-      'https://acme.my.salesforce.test',
+      'https://acme.my.salesforce.com',
     );
     expect(call(fetchMock, 2).auth).toBe('Bearer new-access');
   });

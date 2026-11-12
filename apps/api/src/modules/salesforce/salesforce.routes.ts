@@ -32,6 +32,9 @@ const callbackQuery = z.union([
   z.object({ error: z.string(), error_description: z.string().optional() }),
 ]);
 
+/** Only plain OAuth error codes are echoed back to the app, never arbitrary text. */
+const oauthErrorCode = (code: string) => (/^[A-Za-z_]{1,64}$/.test(code) ? code : 'OAUTH_ERROR');
+
 export const salesforceRouter = Router();
 
 salesforceRouter.get('/status', requireAuth, async (_req, res) => {
@@ -63,7 +66,8 @@ salesforceRouter.get('/callback', async (req, res) => {
   const query = callbackQuery.safeParse(req.query);
   if (!env.salesforce) return res.redirect(backToApp('error', 'SALESFORCE_DISABLED'));
   if (!query.success) return res.redirect(backToApp('error', 'INVALID_CALLBACK'));
-  if ('error' in query.data) return res.redirect(backToApp('error', query.data.error));
+  if ('error' in query.data)
+    return res.redirect(backToApp('error', oauthErrorCode(query.data.error)));
 
   const config = env.salesforce;
   try {

@@ -25,6 +25,12 @@ export const canTransition = (from: SyncStatus, to: SyncStatus): boolean =>
 export const sourcesOf = (to: SyncStatus): SyncStatus[] =>
   SYNC_STATUSES.filter((from) => canTransition(from, to));
 
+/**
+ * A sync still PENDING after this long is considered dead (process crash mid-request) and may be
+ * restarted: the only allowed PENDING → PENDING move.
+ */
+export const STALE_PENDING_MS = 5 * 60_000;
+
 export class InvalidSyncTransition extends HttpError {
   constructor(from: SyncStatus, to: SyncStatus) {
     const message =
@@ -33,8 +39,4 @@ export class InvalidSyncTransition extends HttpError {
         : `Cannot move sync status from ${from} to ${to}`;
     super(409, 'INVALID_SYNC_TRANSITION', message, { from, to });
   }
-}
-
-export function assertTransition(from: SyncStatus, to: SyncStatus): void {
-  if (!canTransition(from, to)) throw new InvalidSyncTransition(from, to);
 }

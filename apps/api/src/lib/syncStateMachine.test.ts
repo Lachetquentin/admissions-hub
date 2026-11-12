@@ -1,11 +1,6 @@
 import { SYNC_STATUSES, type SyncStatus } from '@admissions-hub/shared';
 import { describe, expect, it } from 'vitest';
-import {
-  InvalidSyncTransition,
-  assertTransition,
-  canTransition,
-  sourcesOf,
-} from './syncStateMachine';
+import { InvalidSyncTransition, canTransition, sourcesOf } from './syncStateMachine';
 
 const VALID: [SyncStatus, SyncStatus][] = [
   ['NOT_SYNCED', 'PENDING'],
@@ -23,22 +18,13 @@ const ALL_PAIRS = SYNC_STATUSES.flatMap((from) =>
 describe('sync state machine', () => {
   it.each(VALID)('allows %s → %s', (from, to) => {
     expect(canTransition(from, to)).toBe(true);
-    expect(() => assertTransition(from, to)).not.toThrow();
   });
 
   it.each(ALL_PAIRS.filter(([from, to]) => !isValid(from, to)))(
     'rejects %s → %s with a 409',
     (from, to) => {
       expect(canTransition(from, to)).toBe(false);
-      const error = (() => {
-        try {
-          assertTransition(from, to);
-        } catch (e) {
-          return e;
-        }
-      })();
-      expect(error).toBeInstanceOf(InvalidSyncTransition);
-      expect(error).toMatchObject({
+      expect(new InvalidSyncTransition(from, to)).toMatchObject({
         status: 409,
         code: 'INVALID_SYNC_TRANSITION',
         details: { from, to },

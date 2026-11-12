@@ -77,9 +77,16 @@ export function authorizeUrl(
   return url.toString();
 }
 
+/** Salesforce instances live on https *.salesforce.com / *.force.com: never send tokens elsewhere. */
+const SALESFORCE_HOST = /(^|\.)(salesforce|force)\.com$/;
+const instanceUrl = z.url().refine((value) => {
+  const url = new URL(value);
+  return url.protocol === 'https:' && SALESFORCE_HOST.test(url.hostname);
+}, 'instance_url is not a Salesforce https URL');
+
 const tokenResponse = z.object({
   access_token: z.string(),
-  instance_url: z.url(),
+  instance_url: instanceUrl,
   refresh_token: z.string().optional(),
 });
 export type TokenResponse = z.infer<typeof tokenResponse>;

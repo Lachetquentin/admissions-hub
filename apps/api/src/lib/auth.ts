@@ -17,17 +17,21 @@ export type TokenUser = z.infer<typeof tokenUserSchema>;
  */
 export type SchoolScope = { schoolId: string | null };
 
+/** Session tokens carry this audience, so no other JWT signed with the secret can act as one. */
+const SESSION_AUDIENCE = 'admissions-hub-session';
+
 export function signToken(user: Pick<AuthUser, 'id' | 'role' | 'schoolId'>): string {
   const payload: Omit<TokenUser, 'sub'> = { role: user.role, schoolId: user.schoolId };
   return jwt.sign(payload, env.JWT_SECRET, {
     subject: user.id,
+    audience: SESSION_AUDIENCE,
     expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 }
 
 export function verifyToken(token: string): TokenUser {
   try {
-    return tokenUserSchema.parse(jwt.verify(token, env.JWT_SECRET));
+    return tokenUserSchema.parse(jwt.verify(token, env.JWT_SECRET, { audience: SESSION_AUDIENCE }));
   } catch {
     throw unauthorized('Invalid or expired token');
   }

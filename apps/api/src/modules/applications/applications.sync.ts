@@ -1,10 +1,10 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, lt, or } from 'drizzle-orm';
 import type { Application, SyncStatus } from '@admissions-hub/shared';
 import { db } from '../../db/client';
 import { applications, type ApplicationRow } from '../../db/schema';
 import type { SchoolScope } from '../../lib/auth';
 import { HttpError } from '../../lib/httpErrors';
-import { InvalidSyncTransition, sourcesOf } from '../../lib/syncStateMachine';
+import { InvalidSyncTransition, STALE_PENDING_MS, sourcesOf } from '../../lib/syncStateMachine';
 import { SalesforceError, type SalesforceClient } from '../salesforce/salesforce.client';
 import { getConnection } from '../salesforce/salesforce.connection';
 import { toLead } from '../salesforce/salesforce.mapping';
@@ -19,10 +19,16 @@ type SyncFields = Partial<Pick<ApplicationRow, 'salesforceId' | 'lastSyncError'>
  * move there (state machine), so concurrent requests cannot both win. Returns null otherwise.
  */
 async function transition(id: string, to: SyncStatus, fields: SyncFields = {}) {
+  const allowed = inArray(applications.syncStatus, sourcesOf(to));
+  // A sync left PENDING by a crash may be restarted once it is stale (see STALE_PENDING_MS).
+  const stalePending = and(
+    eq(applications.syncStatus, 'PENDING'),
+    lt(applications.updatedAt, new Date(Date.now() - STALE_PENDING_MS)),
+  );
   const [row] = await db
     .update(applications)
     .set({ syncStatus: to, ...fields, ...(to === 'PENDING' ? {} : { lastSyncAt: new Date() }) })
-    .where(and(eq(applications.id, id), inArray(applications.syncStatus, sourcesOf(to))))
+    .where(and(eq(applications.id, id), to === 'PENDING' ? or(allowed, stalePending) : allowed))
     .returning();
   return row ?? null;
 }
@@ -49,10 +55,11 @@ export async function syncApplication(
 
   const started = await transition(id, 'PENDING');
   if (!started) throw new InvalidSyncTransition(current.syncStatus, 'PENDING');
-  const school = await getSchool(scope, started.schoolId);
 
+  // Everything after PENDING is inside the try, so the row always settles (SYNCED or FAILED).
   let finished: ApplicationRow | null;
   try {
+    const school = await getSchool(scope, started.schoolId);
     const salesforceId = await client.upsertLead(
       toLead(started, school.name),
       started.salesforceId,

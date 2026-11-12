@@ -62,7 +62,9 @@ describe('error format', () => {
   it('answers 404 NOT_FOUND for unknown routes', async () => {
     const res = await request(app).get('/api/nope');
     expect(res.status).toBe(404);
-    expect(res.body).toEqual({ error: { code: 'NOT_FOUND', message: 'Route GET /api/nope not found' } });
+    expect(res.body).toEqual({
+      error: { code: 'NOT_FOUND', message: 'Route GET /api/nope not found' },
+    });
   });
 
   it('answers 400 INVALID_JSON for a malformed JSON body', async () => {

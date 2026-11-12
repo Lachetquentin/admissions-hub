@@ -14,12 +14,13 @@ stateDiagram-v2
     PENDING --> FAILED: Salesforce error / not reachable
     SYNCED --> PENDING: re-sync after an edit
     FAILED --> PENDING: retry
+    PENDING --> PENDING: restart, only if stale (> 5 min)
 ```
 
 | From \ To  | NOT_SYNCED | PENDING | SYNCED | FAILED |
 | ---------- | :--------: | :-----: | :----: | :----: |
 | NOT_SYNCED |     –      |   ✅    |   ❌   |   ❌   |
-| PENDING    |     ❌     |   ❌    |   ✅   |   ✅   |
+| PENDING    |     ❌     | ⏱ stale |   ✅   |   ✅   |
 | SYNCED     |     ❌     |   ✅    |   ❌   |   ❌   |
 | FAILED     |     ❌     |   ✅    |   ❌   |   ❌   |
 
@@ -36,10 +37,19 @@ Invalid transitions answer **409 `INVALID_SYNC_TRANSITION`** with `details: { fr
 - **Idempotent upsert.** A sync reuses `salesforce_id` (PATCH the Lead). If Salesforce no longer
   has that Lead (deleted), a new Lead is created and its id replaces the old one.
 
+### Stale PENDING
+
+Everything after the move to `PENDING` runs inside one `try`, so a Salesforce or mapping error always
+settles the row as `FAILED`. If the process itself dies mid-sync, the row stays `PENDING`; once it is
+older than `STALE_PENDING_MS` (5 minutes, `updated_at`), a new sync may restart it. A fresh `PENDING`
+still answers 409.
+
 ### Known limit
 
-A process crash between `PENDING` and the final update leaves the application in `PENDING`,
-which then refuses new syncs. Recovering stale `PENDING` rows is noted in `docs/IDEAS.md`.
+If the process dies after Salesforce created the Lead but before `SYNCED` is written, the restart does
+not know the Lead id and creates a second Lead. The robust fix is an External ID field on Lead
+(`PATCH /sobjects/Lead/AdmissionsHubId__c/<id>` upserts natively); it needs a custom field in the org,
+so it is listed in `docs/IDEAS.md`.
 
 ## Application business status
 
